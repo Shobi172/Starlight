@@ -1,0 +1,187 @@
+<%- include("../partials/userheader.ejs") %>
+
+    <div class="bg-light py-3">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12 mb-0"><a href="/">Home</a> <span class="mx-2 mb-0">/</span> <a href="/cart">Cart</a> <span class="mx-2 mb-0">/</span> <strong class="text-black">Checkout</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-section">
+      <div class="container">
+        <div class="row mb-5">
+          <div class="col-md-12">
+            <div class="border p-4 rounded" role="alert">
+              Returning customer? <a href="#">Click here</a> to login
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-5 mb-md-0">
+            <h2 class="h3 mb-3 text-black">Billing Details</h2>
+            <div class="p-3 p-lg-5 border">
+
+
+
+               <% address.forEach(value => { %>
+
+
+                  <div
+                  style="border: 1px solid"
+                  class="p-4 d-flex align-content-center align-items-center d9 text-black"
+                >
+                  <input type="radio" value="<%= value._id %>" name="address"/>
+                  <p class="ms-3">
+
+                    <%= value.name %> <br>
+                    <%= value.address %> <br>
+                    <%= value.state %> <br>
+                    <%= value.city %> <br>
+                    <%= value.pincode %> 
+
+                  </p>
+
+                </div>
+
+                <% }) %>
+
+              <!-- <div class="form-group row mb-5">
+                <div class="col-md-6">
+                  <label for="c_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="c_email_address" name="c_email_address">
+                </div>
+                <div class="col-md-6">
+                  <label for="c_phone" class="text-black">Phone <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="c_phone" name="c_phone" placeholder="Phone Number">
+                </div>
+              </div> -->
+
+              <br>
+
+              <div class="input-group-append ">
+               <!-- <button  class="btn btn-primary btn-sm" type="button" id="button-addon2">Add Address</button> -->
+             <a href="/address" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Add Address</a>
+              </div>
+
+              
+
+
+             
+              
+
+            </div>
+          </div>
+          <div class="col-md-6">
+
+            <div class="row mb-5">
+              <div class="col-md-12">
+                <h2 class="h3 mb-3 text-black">Coupon Code</h2>
+                <div class="p-3 p-lg-5 border">
+                  
+                  <label for="c_code" class="text-black mb-3">Enter your coupon code if you have one</label>
+                  <div class="input-group w-75">
+                    <input type="text" class="form-control" id="c_code" placeholder="Coupon Code" aria-label="Coupon Code" aria-describedby="button-addon2">
+                    <div class="input-group-append">
+                      <button class="btn btn-primary btn-sm" type="button" id="button-addon2">Apply</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mb-5">
+              <div class="col-md-12">
+                <h2 class="h3 mb-3 text-black">Your Order</h2>
+                <div class="p-3 p-lg-5 border">
+                  <table class="table site-block-order-table mb-5">
+                    <thead>
+                      <th>Product</th>
+                      <th>Total</th>
+                    </thead>
+                    <tbody>
+
+
+
+                      <% allData.forEach(data => { %>
+
+
+                      <tr>
+                        <td><%= data.productDetail.product_name %></td><strong class="mx-2">x</strong>
+                           <td><%= data.productQuantity %></td>
+                        <td>₹ <%= data.productDetail.price %></td>
+                      </tr>
+
+                      <% }) %>
+
+
+                     
+
+
+                      <tr>
+                        <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
+                        <td class="text-black">₹ <%= sum %></td>
+                      </tr>
+                      <tr>
+                        <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
+                        <td class="text-black font-weight-bold"><strong>₹ <%= sum %></strong></td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div class="border p-3 mb-3">
+                    <input type="radio" name="btn">
+                    <a class="text-black font-weight-bold"  href="#collapsecheque" role="button" aria-expanded="false" aria-controls="collapsecheque">
+                      Online Payment
+                    </a>
+                  </div>
+
+
+
+                  <div class="border p-3 mb-3">
+                    <input type="radio" name="btn">
+                    <a class="text-black font-weight-bold" href="#collapsecheque" role="button" aria-expanded="false" aria-controls="collapsecheque">
+                      Cod
+                    </a>
+                  </div>
+
+
+
+                  <script>
+
+                    $("#checkout-form").submit((e)=>{
+                    e.preventDefault() 
+                    $.ajax({
+                      url:'/place-order',
+                      method:'post',
+                      data:$('#checkout-form').serialize(),
+                      success:(response)=>{
+                        alert(response)
+                      }
+                    })
+                  })
+
+
+                  </script>
+
+                  
+            
+
+                  <div class="form-group">
+                   <a href="/thankyou" class="btn btn-primary btn-lg py-3 btn-block" role="button" onclick="window.location='thankyou.html'" aria-pressed="true">Place Order </a>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!-- </form> -->
+      </div>
+    </div>
+
+    <%- include("../partials/userfooter.ejs") %>
+
+   
