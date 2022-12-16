@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const ObjectID = mongoose.Schema.Types.ObjectID;
+const ObjectId = mongoose.Schema.Types.ObjectID;
 const orderSchema = new mongoose.Schema({
 
   
@@ -30,6 +30,10 @@ const orderSchema = new mongoose.Schema({
         },
     ],
     expectedDelivery: {
+        type: String,
+        required: true,
+    },
+    order_placed_on: {
         type: String,
         required: true,
     },

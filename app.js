@@ -4,17 +4,26 @@ const cookieParser = require('cookie-parser');
 const methodOverride = require('method-override');
 const config = require("./config/config");
 const path  = require("path");
+const express = require("express");
+const app = express();
+
+const dotenv = require("dotenv");
+dotenv.config();
+
+
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
 
 
 const port = 3000;
 mongoose.connect("mongodb://127.0.0.1:27017/Shopping")
 
-const express = require("express");
-const app = express();
 
-const fileupload = require('express-fileupload');
+// const fileupload = require('express-fileupload');
 
-app.use(fileupload());
+// app.use(fileupload());
 
 
 // for view engine
@@ -35,14 +44,6 @@ app.use(session({
 
 app.use(methodOverride('_method'))
 
-const bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}));
-
-
-
-
-
 
 // for user routes
 
@@ -62,6 +63,16 @@ app.use('/',userRoute);
 
 const adminRoute = require('./routes/adminRoute');
 app.use('/admin',adminRoute);
+
+// for 404 Page
+
+app.use((req, res, next) => {
+    res.status(404);
+    res.render('404');  // Render the 404 page
+  });
+
+
+
 
 
 

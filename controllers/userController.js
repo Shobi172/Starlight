@@ -1,4 +1,6 @@
 const User = require('../models/userModel');
+const mongoose = require('mongoose');
+
 
 const bcrypt = require('bcrypt');
 
@@ -7,9 +9,13 @@ const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
 const Cart = require('../models/cartModel');
 const Address = require('../models/addressModel');
+const Order = require('../models/orderModel');
+const Wishlist = require('../models/wishlistModel')
+const instance = require('../middleware/razorpay');
 const { count } = require('../models/userModel');
 const { resolveContent } = require('nodemailer/lib/shared');
 const { findOne } = require('../models/adminModel');
+const moment = require('moment');
 
 
 
@@ -18,7 +24,6 @@ const { findOne } = require('../models/adminModel');
 
 
 let message;
-
 let name;
 let email;
 let phone;
@@ -46,8 +51,8 @@ let password;
 let mailTransporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "shobinshaju@gmail.com",
-      pass: "vuadkljeickhehuk",
+      user: process.env.NODEMAILER_MAIL,
+      pass: process.env.NODEMAILER_PASS,
     },
   });
   const OTP = `${Math.floor(1000 + Math.random() * 9000)}`;
@@ -81,7 +86,7 @@ const GetRegister = async(req,res)=>{
     password = req.body.password;
 
     let mailDetails = {
-      from: "shobinshaju@gmail.com",
+      from: process.env.NODEMAILER_MAIL,
       to: email,
       subject: "STARLIGHT ACCOUNT REGISTRATION",
       html: `<p>YOUR OTP FOR REGISTERING IN STARLIGHT IS ${OTP}</p>`,
@@ -416,13 +421,20 @@ try{
     ]).then((result) =>{
         const sum = result.reduce((accumulator,object) => accumulator + object.productPrice, 0);
 
+        console.log(result);
+
+
+        
+
         
 
         const count = result.length;
 
         
         
-        res.render('user/cart',{allData: result, count, sum, name: req.session.name}); 
+        res.render('user/cart',{allData: result, count, sum, name: req.session.name});
+        
+        
 
         
         
@@ -563,13 +575,106 @@ const GetCartProducts = (req, res) => {
 
 
 
+
+
+
+
+
+// Get Search 
+
+const GetSearch = async(req,res)=>{
+    
+
+    try{
+
+        var search = req.body.search;
+        var product_data = await Product.find({"name":{$regex: ".*"+ search +".*",$options:'i'}});  
+        if(product_data.length > 0){
+           res.render('user/shop',{date: product_data});
+        }
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+
+
+// Get Thankyou 
+
+const GetThankyou = async(req,res)=>{
+    
+
+    try{
+         res.render('user/thankyou');    
+
+
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+
+
+// Get Address 
+
+const GetAddress = async(req,res)=>{
+
+    const userid = req.session.user_id;
+    
+
+    try{
+         res.render('user/address',{userid});    
+
+
+    }catch(error){
+        console.log(error.message);
+    }
+}
+
+
+// Post Address
+
+
+ const PostAddress =  async (req, res) => {
+
+    try {
+
+        const uid = req.session.user_id;
+
+        
+
+        const userads = new Address({
+
+            user_id: uid,  
+            name : req.body.name,
+            address : req.body.address,
+            state : req.body.state,
+            city : req.body.city,
+            pincode : req.body.pincode,
+       
+           });
+       
+       
+           const AdsData = await userads.save();
+       
+               res.redirect("/checkout");
+        
+    } catch (error) {
+
+        console.log(error.message);
+        
+    }
+       
+}
+
+
 // Get Checkout 
 
 const GetCheckout = async(req,res)=>{
 
     try{
             const uid = req.session.user_id;
-            console.log(req.session.user_id)
+            // console.log(req.session.user_id)
             Cart.aggregate([
                 {
                     $match: { user_id: uid },
@@ -607,13 +712,14 @@ const GetCheckout = async(req,res)=>{
                 },
             ])
                 .exec().then(async (result) => {
-                    console.log("reached result ");
+                    // console.log("reached result ");
                     const sum = result
                         .reduce((accumulator, object) => accumulator + object.productPrice, 0);
                     const count = result.length;
                    await Address.find({user_id: uid}).then((adrss) => {
-                        console.log("adress finding...");
-                        console.log(adrss)
+                    // console.log(uid);
+                        // console.log("adress finding...");
+                        // console.log(adrss)
                         res.render('user/checkout', {
                             allData: result, count, sum, name: req.session.name, address: adrss,
                         });
@@ -632,68 +738,352 @@ const GetCheckout = async(req,res)=>{
 
 
 
+// confirm order
+ 
+const confirmOrder = (req, res) => {
+    const uid = req.session.user_id;
+    const paymethod = req.body.pay;
+    const adrs = req.body.address;
+    // const { Order } = model;
+
+    User.findOne({ user_id: uid }).then((userData) => {
+        Cart.aggregate([
+            {
+                $match: { user_id: uid },
+            },
+            {
+                $unwind: '$products',
+            },
+            {
+                $project: {
+                    productItem: '$products.product_id',
+                    productQuantity: '$products.quantity',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'productItem',
+                    foreignField: '_id',
+                    as: 'productDetail',
+                },
+            },
+            {
+                $project: {
+                    productItem: 1,
+                    productQuantity: 1,
+                    productDetail: { $arrayElemAt: ['$productDetail', 0] },
+                },
+            },
+            {
+                $addFields: {
+                    productPrice: {
+                        $sum: { $multiply: ['$productQuantity', '$productDetail.price'] },
+                    },
+                },
+            },
+        ])
+            .exec().then((result) => {
+                
+                for (let i = 0; i < result.length; i++) {
+                    const csctock = result[i].productDetail.stock - result[i].productQuantity;
+                    Product.findByIdAndUpdate(
+                       
+                        { _id: result[i].productDetail._id },
+                        { stock: csctock },
+                    ).then(() => {
+                    }).catch((erp) => {
+                        console.log(erp);
+                    });
+                }
+                
+                const sum = result
+                    .reduce((accumulator, object) => accumulator + object.productPrice, 0);
+                Cart.findOne({ user_id: uid }).then((cartData) => {
+
+                    const order = new Order({
+                        order_id: Date.now(),
+                        user_id: uid,                       
+                        address: adrs,
+                        order_placed_on: moment().format('DD-MM-YYYY'),
+                        products: cartData.products,
+                        totalAmount: sum,
+                        paymentMethod: paymethod,
+                        expectedDelivery: moment().add(4, 'days').format('MMM Do YY'),
+                    });
+                   
+                    order.save().then((done) => {
+                        
+                        const oid = done._id;
+                        Cart.deleteOne({ user_id: uid }).then(() => {
+                            if (paymethod === 'cod') {
+                                res.json([{ success: true, oid }]);
+                            } else if (paymethod === 'online') {
+                                console.log('online');
+                                const amount = done.totalAmount * 100;
+                                const options = {
+                                    amount,
+                                    currency: 'INR',
+                                    receipt: `${oid}`,
+                                };
+                                instance.orders.create(options, (err, orders) => {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        res.json([{ success: false, orders }]);
+                                    }
+                                });
+                            }
+                        });
+                    });
+                });
+            });
+    });
+};
 
 
-// Get Thankyou 
 
-const GetThankyou = async(req,res)=>{
+// order success page
+
+const orderSuccess = (req, res) => {
+    console.log(req.params);
+    const oid = mongoose.Types.ObjectId(req.params.oid);
+    Order.aggregate([
+        { $match: { _id: oid } },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'user_id',
+                foreignField: 'user_id',
+                as: 'user',
+            },
+        },
+        {
+            $lookup: {
+                from: 'addresses',
+                localField: 'address',
+                foreignField: '_id',
+                as: 'address',
+            },
+        },
+    ]).then((result) => {
+        console.log(result);
+        console.log('order_id');
+        res.render('user/orderSuccess', {
+            id: result[0].order_id,
+            amount: result[0].totalAmount,
+            deladd: result[0].address[0],
+            count: result[0].products.length,
+            // name: result[0].user[0].name,
+        });
+    });
+};
+
+// order history
+
+const orderHistory = (req, res) => {
+    // const name = req.session.name;
+    const uid = req.session.user_id;
+    console.log(uid);
+    // console.log(name);
+    Order.aggregate([
+        {
+            $match: { user_id: uid },
+        },
+        {
+            $unwind: '$products',
+        },
+        {
+            $project: {
+                productItem: '$products.product_id',
+                productQuantity: '$products.quantity',
+                order_id: 1,
+                address: 1,
+                expectedDelivery: 1,
+                totalAmount: 1,
+                paymentMethod: 1,
+                paymentStatus: 1,
+                orderStatus: 1,
+                createdAt: 1,
+            },
+        },
+        {
+            $lookup: {
+                from: 'products',
+                localField: 'productItem',
+                foreignField: '_id',
+                as: 'productDetail',
+            },
+        },
+        {
+            $unwind: '$productDetail',
+        },
+        {
+            $addFields: {
+                productPrice: {
+                    $sum: { $multiply: ['$productQuantity', '$productDetail.price'] },
+                },
+            },
+        },
+    ]).then((result) => {
+        // console.log(result);
+       
+        Order.find({ user_id: '638adce7c82d1d6532908d45' }).then((doc) => {
+            
+            res.render('user/orderhistory', {
+                name, count: 0, productData: result, allData: doc, items: 0,
+            });
+        });
+    });
+};    
+
+
+
+const verifyPayment = (req, res) => {
     
+    const details = req.body;
+    let hmac = crypto.createHmac('sha256', 'uYglaEyoaZ1j8MXmPiCDHfZi');
+    hmac.update(
+       
+        details.payment.razorpay_order_id +
+        
+        '|' +
+        
+        details.payment.razorpay_payment_id
+    );
+    hmac = hmac.digest('hex');
+    
+    if (hmac == details.payment.razorpay_signature) {
+        const objId = mongoose.Types.ObjectId(details.order.receipt);
+        console.log(objId);
+        model.Order
+            .updateOne({ _id: objId }, { $set: { paymentStatus: 'Paid' } })
+            .then(() => {
+                res.json({ success: true, oid: details.order.receipt });
+            })
+            .catch((err) => {
+                console.log(err);
+                res.json({ status: false, err_message: 'payment failed' });
+            });
+    } else {
+        res.json({ status: false, err_message: 'payment failed' });
+    }
+};
+
+
+
+
+const paymentFailure = (req, res) => {
+    const details = req.body;
+    console.log(details);
+    res.send('payment failed');
+};
+
+
+
+// Get Wishlist 
+ 
+
+const GetWishlist = async(req,res)=>{
 
     try{
-         res.render('user/thankyou');    
-
-
-    }catch(error){
-        console.log(error.message);
-    }
-}
-
-
-// Get Address 
-
-const GetAddress = async(req,res)=>{
     
-
-    try{
-         res.render('user/address');    
-
-
-    }catch(error){
-        console.log(error.message);
-    }
-}
-
-// Post Address
-
-
- const PostAddress =  async (req, res) => {
-
-    try {
-
-        const userads = new Address({
-
-            name : req.body.name,
-            address : req.body.address,
-            state : req.body.state,
-            city : req.body.city,
-            pincode : req.body.pincode,
-       
-           });
-       
-       
-           const AdsData = await userads.save();
-       
-               res.redirect("/checkout");
-        
-    } catch (error) {
-
-        console.log(error.message);
-        
-    }
-       
-}
-      
+        const uid = req.session.user_id;
     
+    
+        
+    
+        const wishlistData = await Wishlist.aggregate([
+            {
+                
+                $match: { userId: uid },
+            },
+            {
+                $unwind: '$product',
+            },
+            {
+                $project: {
+                    productItem: '$product.productId',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'productItem',
+                    foreignField: '_id',
+                    as: 'productDetail',
+                },
+            },
+            {
+                $project: {
+                    productItem: 1,
+                    productDetail: { $arrayElemAt: ['$productDetail', 0] },
+                },
+            },
+        ]);
+        res.render(
+            'user/wishlist',
+            {
+                name: req.session.name,
+                
+                wishlistData,
+                
+            },
+    
+    
+    )}
+      catch(error){
+    
+            console.log(error.message);
+        }
+    }
+    
+    // Add to wishlist
+
+    const AddWishlistProducts = (req, res) => {
+        const uid = req.session.user_id;
+        const { pid } = req.body;
+        const proObj = {
+            productId: pid,
+        };
+        const userWishlist = Wishlist.findOne({ userId: uid });
+        const verify = Cart.findOne(
+            { user_id: uid },
+            { product: { $elemMatch: { productId: pid } } },
+        );
+        if (verify?.products?.length) {
+            res.json({ cart: true });
+        } else {
+            
+            if (userWishlist) {
+                const proExist = userWishlist.product.findIndex(
+                    (product) => product.productId === pid,
+                );
+                if (proExist !== -1) {
+                    res.json({ productExist: true });
+                } else {
+                    Wishlist
+                        .updateOne({ userId: uid }, { $push: { product: proObj } })
+                        .then(() => {
+                            res.json({ success: true });
+                        });
+                }
+            } else {
+                Wishlist
+                    .create({
+                        userId: uid,
+                        product: [
+                            {
+                                productId: pid,
+                            },
+                        ],
+                    })
+                    .then(() => {
+                        res.json({ status: true });
+                    });
+            }
+        }
+}
   
 
 
@@ -721,7 +1111,7 @@ const GetSingleshop = async(req,res)=>{
             
 
     }catch(error){
-        console.log(error.message);
+        res.render('user/404');
     }
 }
 
@@ -769,6 +1159,14 @@ module.exports = {
     GetMyAcct,
     GetCategories,
     GetAddress,
-    PostAddress
+    PostAddress,
+    confirmOrder,
+    GetWishlist,
+    GetSearch,
+    orderSuccess,
+    orderHistory,
+    verifyPayment,
+    paymentFailure,
+    AddWishlistProducts
     
 }

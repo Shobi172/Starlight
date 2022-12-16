@@ -29,7 +29,7 @@
           <div class="row align-items-center">
 
             <div class="col-6 col-md-4 order-2 order-md-1 site-search-icon text-left">
-              <form action="" class="site-block-top-search">
+              <form action="/search" class="site-block-top-search">
                 <span class="icon icon-search2"></span>
                 <input type="text" class="form-control border-0" placeholder="Search">
               </form>
@@ -37,7 +37,7 @@
 
             <div class="col-12 mb-3 mb-md-0 col-md-4 order-1 order-md-2 text-center">
               <div class="site-logo">
-                <a href="/home" class="js-logo-clone">Starlight</a>
+                <a href="/" class="js-logo-clone">Starlight</a>
               </div>
             </div>
 
@@ -45,13 +45,13 @@
             <div class="col-6 col-md-4 order-3 order-md-3 text-right">
               <div class="site-top-icons">
                 <ul>
-                  <li><a href="#"><span class="icon icon-person"></span></a></li>
-                  <li><a href="#"><span class="icon icon-heart-o"></span></a></li>
+                  <li><a href="/myaccount"><span class="icon icon-person"></span></a></li>
+                  <li><a href="/wishlist"><span class="icon icon-heart-o"></span></a></li>
                   <li>
                    
                     <% if (user) { %>
 
-                      <li><a href="/logout">Log out </a></li>
+                      <li><a href="/logout">Log out </a></li> 
                       <% } else {%>
                         <li><a href="/login">Log in</a></li>
                         <% } %>
@@ -84,7 +84,7 @@
           <ul class="site-menu js-clone-nav d-none d-md-block">
             <li>
                <!-- class="has-children active" -->
-              <a href="/home">Home</a>
+              <a href="/">Home</a>
               <ul class="dropdown">
                 <!-- <li><a href="#">Menu One</a></li>
                 <li><a href="#">Menu Two</a></li>
@@ -233,7 +233,7 @@
               <div class="item">
                 <div class="block-3 text-center" >
                   <figure class="block-4-image" >
-                    <a href="/shop"><img src="/products/img/<%=products._id%>.jpg" alt="" class="img-fluid"></a>
+                    <a href="/shop"><img src="<%= products.image[2].url%>" alt="" class="img-fluid"></a>
                   </figure>
                   <div class="block-4-text p-4">
                     <h3><a href="#"><%= products.name %></a></h3>

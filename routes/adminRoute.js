@@ -1,14 +1,23 @@
 const express = require("express");
 const admin_route = express();
 
+// const mkdirp  = require('mkdirp');
+// const fs  = require('fs-extra');
+// const resizeimg  = require('resize-img');
+
 
 
 const config = require("../config/config");
 
 const adminAuth = require("../middleware/adminAuth").verifyAdmin
 
+const multer = require("multer");
 
-const path  = require("path");
+const {storage} = require("../middleware/imageUpload");
+
+const upload = multer({storage});
+
+
 
 
 const admincontroller = require("../controllers/adminController");
@@ -21,6 +30,12 @@ admin_route.post('/login',admincontroller.PostLogin);
 admin_route.get('/dashboard', adminAuth,admincontroller.GetDashboard);
 
 admin_route.get('/order',adminAuth,admincontroller.GetOrder);
+
+admin_route.post('/changestatus',adminAuth,admincontroller.OrderStatus);
+
+admin_route.post('/ordercompleted',adminAuth,admincontroller.OrderCompleted);
+
+admin_route.post('/ordercancel',adminAuth,admincontroller.OrderCancelled);
 
 admin_route.get('/coupon',adminAuth,admincontroller.GetCoupon);
 
@@ -52,13 +67,11 @@ admin_route.get('/product', adminAuth,admincontroller.GetProduct);
 
 admin_route.get('/addproduct',adminAuth,admincontroller.AddProduct);
 
-admin_route.post('/product',adminAuth,admincontroller.PostProduct);
+admin_route.post('/product',upload.array('image',5),adminAuth,admincontroller.PostProduct);
 
 admin_route.get('/editproduct/:id',adminAuth,admincontroller.GetEditProduct);
 
-admin_route.post('/editproduct/:id',adminAuth,admincontroller.PostEditProduct);
-
-admin_route.post('/productgallery/:id',adminAuth,admincontroller.ProductGallery);
+admin_route.post('/editproduct/:id',upload.array('image',5),adminAuth,admincontroller.PostEditProduct);
 
 admin_route.get('/deleteproduct/:id',adminAuth,admincontroller.DeleteProduct);
 

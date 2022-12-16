@@ -2,11 +2,24 @@ const Admin = require("../models/adminModel");
 const User = require("../models/userModel");
 const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
+const Order = require("../models/orderModel");
 const Cart = require("../models/cartModel");
+const upload = require("../middleware/imageUpload");
+const multer = require("multer");
+const sharp = require("sharp");
+
 
 const bcrypt = require("bcrypt");
 const { name } = require("ejs");
 const { Result } = require("express-validator");
+
+const { log } = require("console");
+
+
+const fs = require('fs');
+const moment = require('moment');
+
+
 
 // Get Login
 
@@ -45,6 +58,8 @@ const PostLogin = async (req, res) => {
   }
 };
 
+
+
 // Get Dashboard
 
 const GetDashboard = async (req, res) => {
@@ -55,15 +70,91 @@ const GetDashboard = async (req, res) => {
   }
 };
 
+
+
 // Get Order
 
 const GetOrder = async (req, res) => {
-  try {
-    res.render("admin/order");
-  } catch (error) {
-    console.log(error.message);
-  }
+  Order.aggregate([
+
+    {
+      $lookup: {
+          from: 'products',
+          localField: 'products.product_id',
+          foreignField: '_id',
+          as: 'product',
+      },
+  },
+    {
+        $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: 'user_id',
+            as: 'user',
+        },
+    },
+    {
+        $lookup: {
+            from: 'addresses',
+            localField: 'address',
+            foreignField: '_id',
+            as: 'address',
+        },
+    },
+]).then((result) => {
+    
+    res.render('admin/order', {allData: result});
+});
 };
+
+
+
+const OrderStatus = (req, res) => {
+  const { orderID, paymentStatus, orderStatus } = req.body;
+
+
+  console.log(req.body);
+
+  console.log({orderid :orderID});
+
+ 
+  Order.findByIdAndUpdate(
+      { _id: orderID },
+      {
+          paymentStatus, orderStatus
+      },
+  ).then((result) => {
+
+    console.log('Order status changed');
+      
+      res.send('Working');
+  }).catch((e) => {
+      console.log(e);
+  });
+};
+
+
+
+const OrderCompleted = (req, res) => {
+  const { orderID } = req.body;
+  Order.findByIdAndUpdate(
+      { _id: orderID },
+      { orderStatus: 'Completed' },
+  ).then(() => {
+      res.send('done');
+  });
+};
+
+const OrderCancelled = (req, res) => {
+  const { orderID } = req.body;
+  Order.findByIdAndUpdate(
+      { _id: orderID },
+      { orderStatus: 'Cancelled', paymentStatus: 'Cancelled' },
+  ).then(() => {
+      res.send('done');
+  });
+};
+
 
 // Get Coupon
 
@@ -225,50 +316,84 @@ const AddProduct = async (req, res) => {
   }
 };
 
+
+
 const PostProduct = async (req, res) => {
-  if (req.session.admin_id) {
-    const newProduct = new Product(req.body);
-    await newProduct.save();
-    let image = req.files.image;
-    image.mv(
-      "./public/products/img/" + newProduct._id + ".jpg",
-      (err, data) => {
-        if (!err) {
-          console.log(newProduct);
-          res.redirect("/admin/product");
-        } else {
-          console.log(err);
-        }
-      }
-    );
-  } else {
-    res.redirect("/admin/login");
+
+  try{
+    
+      const newProduct = new Product({
+
+        name:req.body.name,
+        category:req.body.category,
+        quantity:req.body.quantity,
+        stock:req.body.stock,
+        price:req.body.price,
+        description:req.body.description,
+      });
+
+      
+
+      newProduct.image = req.files.map((f)=>({url:f.path, filename:f.filename}));
+
+      
+
+     
+
+       const productitm = await newProduct.save();
+      
+            // console.log(newProduct);
+            res.redirect("/admin/product");
+
+  }catch(error){
+    console.log((error.message));
   }
+  
 };
+
+// Get editproduct
+
 
 const GetEditProduct = async (req, res) => {
   const id = req.params.id;
-  const product = await Product.findById(id);
-  const categories = await Category.find({});
+  const product = await Product.findOne({_id:id}).populate('category');
+  const categories = await Category.find();
 
-  res.render("admin/editproduct", { product, categories });
+  res.render("admin/editproduct", {product, categories });
 };
 
-const PostEditProduct = async (req, res) => {
-  try {
-    const id = req.params.id;
-    await Product.findByIdAndUpdate(id, req.body);
 
+
+// post editproduct
+
+const PostEditProduct = async (req, res) => {
+  
+  const id = req.params.id;
+
+  if(req.files.length>0){
+    const photos = req.files.map((f)=>({
+      url:f.path,
+      filename: f.filename,
+     }));
+     let product = await Product.updateOne({_id:id},{image:photos})
+  }
+
+    try {
+      await Product.updateOne({ _id: id },
+        {
+            $set: 
+                req.body
+        })
+      
     res.redirect("/admin/product");
 
-    if (req.session.admin_id) {
-      let image = req.files.image;
-      image.mv("./public/products/img/" + id + ".jpg");
-    }
   } catch (error) {
     console.log(error);
   }
 };
+
+
+// delete product
 
 const DeleteProduct = async (req, res) => {
   try {
@@ -282,21 +407,7 @@ const DeleteProduct = async (req, res) => {
   }
 };
 
-const ProductGallery = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const thumbPath =
-      "public/products/img/" + id + "/gallery/thumbs" + req.files.file.name;
 
-    if (req.session.admin_id) {
-      let image = req.files.image;
-
-      image.mv("public/products/img/" + id + "/gallery/" + req.files.file.name);
-    }
-  } catch (error) {
-    console.log(error.message);
-  }
-};
 
 // display product by category
 
@@ -336,6 +447,8 @@ module.exports = {
   PostEditCategory,
   GetEditProduct,
   PostEditProduct,
-  ProductGallery,
   CatProduct,
+  OrderStatus,
+  OrderCompleted,
+  OrderCancelled
 };

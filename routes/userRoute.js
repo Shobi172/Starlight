@@ -45,6 +45,22 @@ user_route.post('/delete-cart-item', usercontroller.DeleteCartPdt);
 
 user_route.get('/checkout', usercontroller.GetCheckout);
 
+user_route.post('/orderconfirmed', usercontroller.confirmOrder);
+
+user_route.get('/ordersuccess/:oid', usercontroller.orderSuccess);
+
+user_route.get('/orderhistory', usercontroller.orderHistory);
+
+user_route.post('/verifyPayment', usercontroller.verifyPayment);
+
+user_route.get('/paymentFail', usercontroller.paymentFailure);
+
+user_route.post('/search', usercontroller.GetSearch);
+
+user_route.get('/wishlist', usercontroller.GetWishlist);
+
+user_route.post('/addtowishlist', usercontroller.AddWishlistProducts);
+
 user_route.get('/address', usercontroller.GetAddress);
 
 user_route.post('/address', usercontroller.PostAddress);
@@ -54,6 +70,10 @@ user_route.get('/thankyou', usercontroller.GetThankyou);
 user_route.get('/singleshop/:id', usercontroller.GetSingleshop);
 
 user_route.get('/logout', usercontroller.GetLogout);
+
+
+
+
 
 
 module.exports = user_route;

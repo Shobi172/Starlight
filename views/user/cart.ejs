@@ -24,6 +24,7 @@
                     <th class="product-thumbnail">Image</th>
                     <th class="product-name">Product</th>
                     <th class="product-price">Price</th>
+                    <!-- <th class="product-size">Size</th> -->
                     <th class="product-quantity">Quantity</th>
                     <th class="product-total">Total</th>
                     <th class="product-remove">Remove</th>
@@ -45,13 +46,14 @@
 
                   <tr>
                     <td class="product-thumbnail">
-                      <img src="/products/img/<%= data.productDetail._id %>.jpg" alt="Image" class="img-fluid" width="50rem">
+                      <img src="<%= data.productDetail.image[2].url %>" alt="Image" class="img-fluid" width="50rem">
                 
                     </td>
                     <td class="product-name">
                       <h2 class="h5 text-black"><%= data.productDetail.name %></h2>
                     </td>
                     <td>₹ <%= data.productDetail.price %></td>
+                    <!-- <td><%= data.productDetail.size %></td> -->
                     <td>
                       <!-- <p><%= data.productQuantity %></p> -->
 

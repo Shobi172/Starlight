@@ -1,187 +1,179 @@
 <%- include("../partials/userheader.ejs") %>
 
-    <div class="bg-light py-3">
+<section class="mt-5">
       <div class="container">
-        <div class="row">
-          <div class="col-md-12 mb-0"><a href="/">Home</a> <span class="mx-2 mb-0">/</span> <a href="/cart">Cart</a> <span class="mx-2 mb-0">/</span> <strong class="text-black">Checkout</strong></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="site-section">
-      <div class="container">
-        <div class="row mb-5">
-          <div class="col-md-12">
-            <div class="border p-4 rounded" role="alert">
-              Returning customer? <a href="#">Click here</a> to login
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6 mb-5 mb-md-0">
-            <h2 class="h3 mb-3 text-black">Billing Details</h2>
-            <div class="p-3 p-lg-5 border">
-
-
-
-               <% address.forEach(value => { %>
-
-
+        <!-- <div class="d-flex"> -->
+          <form method="post" id="checkout">
+            <div class="row">
+              <div class="order col-md-6 mt-3">
+                <h5 class="white">Order Details:</h5>
+                <div
+                  style="border: 1px solid; width: 100%;"
+                  class="p-4 d9"
+                >
+                <h6>Products: </h6>
+                  <% allData.forEach(element => { %>
+                  <div>&emsp;&emsp; <%= element.productDetail.product_name %> &emsp; &emsp; &emsp; Qty: <%= element.productQuantity %> <label for="">x &emsp; Rs. <%= element.productDetail.price %></label>&emsp; = &emsp;&emsp;Rs.  <%= element.productPrice %></div> 
+                  <% }) %>
+                  <!-- <div>&emsp; white Shoes &emsp; Qty: 1 <label for="">x Rs.999</label>&emsp;Price: Rs.999</div> -->
+                  <hr>
+                  &emsp; &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &emsp; <b>Total: &emsp;&emsp;  Rs. <%= sum %> </b>  
+                </div>
+              </div>
+              <div class="shipadrss col-md-6 mt-3">
+                <h5 class="white">Shipping Address:</h5>
+                <!-- <a href="/address" class="btn btn-primary">+ Add Address</a> -->
+      
+                <% address.forEach(data => { %>
                   <div
                   style="border: 1px solid"
-                  class="p-4 d-flex align-content-center align-items-center d9 text-black"
+                  class="p-4 d-flex align-content-center align-items-center d9"
                 >
-                  <input type="radio" value="<%= value._id %>" name="address"/>
+                  <input type="radio" value="<%= data._id %>" name="address"/>&emsp;&emsp;
                   <p class="ms-3">
-
-                    <%= value.name %> <br>
-                    <%= value.address %> <br>
-                    <%= value.state %> <br>
-                    <%= value.city %> <br>
-                    <%= value.pincode %> 
-
+                    <b><%=data.name %> </b><br />
+                    <%= data.address %> <br>
+                    <%= data.city %> ,
+                    <%= data.state %> <br>
+                    <%= data.pincode %> 
                   </p>
-
                 </div>
-
                 <% }) %>
-
-              <!-- <div class="form-group row mb-5">
-                <div class="col-md-6">
-                  <label for="c_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" id="c_email_address" name="c_email_address">
+                <% if (address.length == 1) { %>
+                  <div
+                  style="border: 1px solid"
+                  class="p-4 d-flex align-items-center d9"
+                >
+                  <a href="/address" class="btn btn-primary">+ Add Address</a>
                 </div>
-                <div class="col-md-6">
-                  <label for="c_phone" class="text-black">Phone <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" id="c_phone" name="c_phone" placeholder="Phone Number">
+                <% } %>
+              </div>
+              <div class="payment col-md-6 mt-3">
+                <h5 class="white">Payment:</h5>
+                <div
+                  style="border: 1px solid"
+                  class="p-4 d-flex align-content-center align-items-center d9"
+                >
+                  <input type="radio" name="pay" value="cod" class="me-1" required checked/>
+                    Cash On Delivery (COD)
                 </div>
-              </div> -->
-
-              <br>
-
-              <div class="input-group-append ">
-               <!-- <button  class="btn btn-primary btn-sm" type="button" id="button-addon2">Add Address</button> -->
-             <a href="/address" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Add Address</a>
+                <div
+                  style="border: 1px solid"
+                  class="p-4 d-flex align-content-center align-items-center d9"
+                >
+                <input type="radio" name="pay" value="Online" class="me-1" required/>
+                  Pay Online
+                </div>
               </div>
 
-              
-
-
-             
-              
-
-            </div>
-          </div>
-          <div class="col-md-6">
-
-            <div class="row mb-5">
-              <div class="col-md-12">
-                <h2 class="h3 mb-3 text-black">Coupon Code</h2>
-                <div class="p-3 p-lg-5 border">
-                  
-                  <label for="c_code" class="text-black mb-3">Enter your coupon code if you have one</label>
-                  <div class="input-group w-75">
-                    <input type="text" class="form-control" id="c_code" placeholder="Coupon Code" aria-label="Coupon Code" aria-describedby="button-addon2">
-                    <div class="input-group-append">
-                      <button class="btn btn-primary btn-sm" type="button" id="button-addon2">Apply</button>
-                    </div>
-                  </div>
-
-                </div>
+              <div class="payment col-md-6 mt-3 p-5" >
+                <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+                  Confirm Order
+                </button>
+                
+                  <a
+                    href="/cart"
+                    class="btn btn-primary btn-lg w-100 mt-2"
+                  >
+                    Go Back
+                  </a>
               </div>
             </div>
-            
-            <div class="row mb-5">
-              <div class="col-md-12">
-                <h2 class="h3 mb-3 text-black">Your Order</h2>
-                <div class="p-3 p-lg-5 border">
-                  <table class="table site-block-order-table mb-5">
-                    <thead>
-                      <th>Product</th>
-                      <th>Total</th>
-                    </thead>
-                    <tbody>
-
-
-
-                      <% allData.forEach(data => { %>
-
-
-                      <tr>
-                        <td><%= data.productDetail.product_name %></td><strong class="mx-2">x</strong>
-                           <td><%= data.productQuantity %></td>
-                        <td>₹ <%= data.productDetail.price %></td>
-                      </tr>
-
-                      <% }) %>
-
-
-                     
-
-
-                      <tr>
-                        <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
-                        <td class="text-black">₹ <%= sum %></td>
-                      </tr>
-                      <tr>
-                        <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
-                        <td class="text-black font-weight-bold"><strong>₹ <%= sum %></strong></td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <div class="border p-3 mb-3">
-                    <input type="radio" name="btn">
-                    <a class="text-black font-weight-bold"  href="#collapsecheque" role="button" aria-expanded="false" aria-controls="collapsecheque">
-                      Online Payment
-                    </a>
-                  </div>
-
-
-
-                  <div class="border p-3 mb-3">
-                    <input type="radio" name="btn">
-                    <a class="text-black font-weight-bold" href="#collapsecheque" role="button" aria-expanded="false" aria-controls="collapsecheque">
-                      Cod
-                    </a>
-                  </div>
-
-
-
-                  <script>
-
-                    $("#checkout-form").submit((e)=>{
-                    e.preventDefault() 
-                    $.ajax({
-                      url:'/place-order',
-                      method:'post',
-                      data:$('#checkout-form').serialize(),
-                      success:(response)=>{
-                        alert(response)
-                      }
-                    })
-                  })
-
-
-                  </script>
-
-                  
-            
-
-                  <div class="form-group">
-                   <a href="/thankyou" class="btn btn-primary btn-lg py-3 btn-block" role="button" onclick="window.location='thankyou.html'" aria-pressed="true">Place Order </a>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
-          </div>
+          </form>
         </div>
-        <!-- </form> -->
       </div>
+    </section>
+    <div class="white">
+      <!-- <%= allData %> -->
     </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="/javascript/cart.js"></script>
+    <style>
+      .blue{
+        background-color: #000000;
+      }
+      .d9{
+        background-color: #ffffff;
+      }
+      .white{
+        color: rgb(0, 0, 0);
+      }
+    </style>
 
-    <%- include("../partials/userfooter.ejs") %>
 
-   
+<%- include("../partials/userfooter.ejs") %>
+
+
+<script>
+  $("#checkout").submit((e) => {
+    e.preventDefault();
+      $.ajax({
+      url: "/orderconfirmed",
+      method: "post",
+      data: $("#checkout").serialize(),
+      success: (response) => {
+            if (response[0].success) {
+              location.href = `/ordersuccess/${response[0].oid}`;
+            } else {
+              razorPay(response[0].orders);
+            }
+        },
+      });
+  });
+    
+    
+  function razorPay(order) {
+        var options = {
+          key: "rzp_test_mqyD5x6VcWLJVE", // Enter the Key ID generated from the Dashboard
+          amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+          currency: "INR",
+          name: "Starlight",
+          description: "Test Transaction",
+          order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+          handler: function (response) {
+            verifyPayment(response, order);
+          },
+          prefill: {
+            name: "Shobin",
+            email: "shobin@gmail.com",
+            contact: "9876543210",
+          },
+          notes: {
+            address: "Razorpay Corporate Office",
+          },
+          theme: {
+            color: "#3399cc",
+          },
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.on("payment.failed", function (response) {
+        });
+        rzp1.open();
+      }
+
+
+      function verifyPayment(payment, order) {
+      $.ajax({
+      url: "/verifyPayment",
+      data: {
+        payment,
+        order,
+      },
+      method: "post",
+      success: (response) => {
+        if (response.success) {
+          location.href = `/ordersuccess/${response.oid}`;
+        } else {
+          location.href = "/paymentFail";
+        }
+      },
+    });
+  }
+    </script>
+  </body>
+</html>

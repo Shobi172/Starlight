@@ -1,510 +1,340 @@
-<%- include("../partials/adminheader.ejs") %>
-
-
-            <!-- New Table -->
-            <div class="w-full overflow-hidden rounded-lg shadow-xs">
-              <div class="w-full overflow-x-auto">
-                <table class="w-full whitespace-no-wrap">
-                  <thead>
-                    <tr
-                      class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800"
-                    >
-                      <th class="px-4 py-3">Client</th>
-                      <th class="px-4 py-3">Amount</th>
-                      <th class="px-4 py-3">Status</th>
-                      <th class="px-4 py-3">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody
-                    class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800"
-                  >
-                    <tr class="text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <!-- Avatar with inset shadow -->
-                          <div
-                            class="relative hidden w-8 h-8 mr-3 rounded-full md:block"
-                          >
-                            <img
-                              class="object-cover w-full h-full rounded-full"
-                              src="https://images.unsplash.com/flagged/photo-1570612861542-284f4c12e75f?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
-                              alt=""
-                              loading="lazy"
-                            />
-                            <div
-                              class="absolute inset-0 rounded-full shadow-inner"
-                              aria-hidden="true"
-                            ></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Hans Burger</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                              10x Developer
-                            </p>
-                          </div>
-                        </div>
+<!DOCTYPE html>
+<html lang="en">
+    <%- include('../partials/adminheader.ejs') %> 
+    <link rel="stylesheet" href="/css/adminProducts.css" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css">
+    <section class="body-section">
+        <h3 class="i-names">Orders</h3>
+        <div class="container">
+          <div class="table-responsive">
+              <table class="table align-middle" id="ptable">
+                <thead>
+                  <tr>
+                      <th scope="col">Order id</th>
+                      
+                      
+                      <th scope="col">Payment method</th>
+                      <th scope="col">Payment status</th>
+                      <th scope="col">Order status</th>
+                      <th scope="col">Order placed at</th>
+                      <th scope="col">Delivery expected</th>
+                      <th></th>
+                      <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% allData.forEach(data => { %>
+                    <tr <% if (data.orderStatus == 'Completed') { %>
+                      style="background-color: #3ef06e"
+                    <% } else if(data.orderStatus == 'Cancelled') { %>
+                      style="background-color: #f70505"
+                      <% } %> 
+                      >
+                      <td>#<%= data.order_id %></td>
+                      
+                      
+                      <td><%= data.paymentMethod %></td>
+                      <td>
+                          <select name="pstatus" id="ps<%= data._id %>" class="form-select-sm" disabled>
+                            <% if (data.paymentStatus === 'Pending') { %>
+                              <option value="Paid">Paid</option>
+                              <option value="Pending" selected>Pending</option>
+                            <% } else if (data.paymentStatus === 'Paid') {%>
+                              <option value="Paid" selected>Paid</option>
+                              <option value="Pending">Pending</option>
+                            <% } else if (data.paymentStatus === 'Cancelled') {%>
+                              <option value="Cancelled">Cancelled</option>
+                               <% } %> 
+                          </select>
                       </td>
-                      <td class="px-4 py-3 text-sm">
-                        $ 863.45
+                      <td>
+                          <select name="orstatus" class="form-select-sm" id="or<%= data._id %>" disabled>
+                            <% if (data.orderStatus === 'Pending') { %>
+                              <option value="Pending" selected>Pending</option>
+                              <option value="Confirmed" >Confimed</option>
+                              <option value="Shipped">Shipped</option>
+                              <option value="Delivered">Delivered</option>
+                            <% } else if (data.orderStatus === 'Confirmed') {%>
+                              <option value="Pending">Pending</option>
+                              <option value="Confirmed" selected>Confimed</option>
+                              <option value="Shipped">Shipped</option>
+                              <option value="Delivered">Delivered</option>
+                            <% } else if (data.orderStatus === 'Shipped') {%>
+                              <option value="Pending">Pending</option>
+                              <option value="Confirmed">Confimed</option>
+                              <option value="Shipped" selected>Shipped</option>
+                              <option value="Delivered">Delivered</option>
+                              <% } else if (data.orderStatus === 'Delivered') {%>
+                                <option value="Pending">Pending</option>
+                                <option value="Confiemed">Confimed</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered" selected>Delivered</option>
+                              <% } else if (data.orderStatus === 'Completed') {%>
+                                <option value="Completed">Completed</option>
+                              <% } else if (data.orderStatus === 'Cancelled') {%>
+                                <option value="Cancelled">Cancelled</option>
+                              <% } %> 
+                          </select>
                       </td>
-                      <td class="px-4 py-3 text-xs">
-                        <span
-                          class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"
-                        >
-                          Approved
-                        </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        6/10/2020
-                      </td>
-                    </tr>
-
-                    <tr class="text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <!-- Avatar with inset shadow -->
-                          <div
-                            class="relative hidden w-8 h-8 mr-3 rounded-full md:block"
-                          >
-                            <img
-                              class="object-cover w-full h-full rounded-full"
-                              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&facepad=3&fit=facearea&s=707b9c33066bf8808c934c8ab394dff6"
-                              alt=""
-                              loading="lazy"
-                            />
-                            <div
-                              class="absolute inset-0 rounded-full shadow-inner"
-                              aria-hidden="true"
-                            ></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Jolina Angelie</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                              Unemployed
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        $ 369.95
-                      </td>
-                      <td class="px-4 py-3 text-xs">
-                        <span
-                          class="px-2 py-1 font-semibold leading-tight text-orange-700 bg-orange-100 rounded-full dark:text-white dark:bg-orange-600"
-                        >
-                          Pending
-                        </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        6/10/2020
-                      </td>
-                    </tr>
-
-                    <tr class="text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <!-- Avatar with inset shadow -->
-                          <div
-                            class="relative hidden w-8 h-8 mr-3 rounded-full md:block"
-                          >
-                            <img
-                              class="object-cover w-full h-full rounded-full"
-                              src="https://images.unsplash.com/photo-1551069613-1904dbdcda11?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
-                              alt=""
-                              loading="lazy"
-                            />
-                            <div
-                              class="absolute inset-0 rounded-full shadow-inner"
-                              aria-hidden="true"
-                            ></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Sarah Curry</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                              Designer
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        $ 86.00
-                      </td>
-                      <td class="px-4 py-3 text-xs">
-                        <span
-                          class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-full dark:text-red-100 dark:bg-red-700"
-                        >
-                          Denied
-                        </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        6/10/2020
-                      </td>
-                    </tr>
-
-                    <tr class="text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <!-- Avatar with inset shadow -->
-                          <div
-                            class="relative hidden w-8 h-8 mr-3 rounded-full md:block"
-                          >
-                            <img
-                              class="object-cover w-full h-full rounded-full"
-                              src="https://images.unsplash.com/photo-1551006917-3b4c078c47c9?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
-                              alt=""
-                              loading="lazy"
-                            />
-                            <div
-                              class="absolute inset-0 rounded-full shadow-inner"
-                              aria-hidden="true"
-                            ></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Rulia Joberts</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                              Actress
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        $ 1276.45
-                      </td>
-                      <td class="px-4 py-3 text-xs">
-                        <span
-                          class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"
-                        >
-                          Approved
-                        </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        6/10/2020
-                      </td>
-                    </tr>
-
-                    <tr class="text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <!-- Avatar with inset shadow -->
-                          <div
-                            class="relative hidden w-8 h-8 mr-3 rounded-full md:block"
-                          >
-                            <img
-                              class="object-cover w-full h-full rounded-full"
-                              src="https://images.unsplash.com/photo-1546456073-6712f79251bb?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
-                              alt=""
-                              loading="lazy"
-                            />
-                            <div
-                              class="absolute inset-0 rounded-full shadow-inner"
-                              aria-hidden="true"
-                            ></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Wenzel Dashington</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                              Actor
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        $ 863.45
-                      </td>
-                      <td class="px-4 py-3 text-xs">
-                        <span
-                          class="px-2 py-1 font-semibold leading-tight text-gray-700 bg-gray-100 rounded-full dark:text-gray-100 dark:bg-gray-700"
-                        >
-                          Expired
-                        </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        6/10/2020
-                      </td>
-                    </tr>
-
-                    <tr class="text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <!-- Avatar with inset shadow -->
-                          <div
-                            class="relative hidden w-8 h-8 mr-3 rounded-full md:block"
-                          >
-                            <img
-                              class="object-cover w-full h-full rounded-full"
-                              src="https://images.unsplash.com/photo-1502720705749-871143f0e671?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&s=b8377ca9f985d80264279f277f3a67f5"
-                              alt=""
-                              loading="lazy"
-                            />
-                            <div
-                              class="absolute inset-0 rounded-full shadow-inner"
-                              aria-hidden="true"
-                            ></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Dave Li</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                              Influencer
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        $ 863.45
-                      </td>
-                      <td class="px-4 py-3 text-xs">
-                        <span
-                          class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"
-                        >
-                          Approved
-                        </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        6/10/2020
-                      </td>
-                    </tr>
-
-                    <tr class="text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <!-- Avatar with inset shadow -->
-                          <div
-                            class="relative hidden w-8 h-8 mr-3 rounded-full md:block"
-                          >
-                            <img
-                              class="object-cover w-full h-full rounded-full"
-                              src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
-                              alt=""
-                              loading="lazy"
-                            />
-                            <div
-                              class="absolute inset-0 rounded-full shadow-inner"
-                              aria-hidden="true"
-                            ></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Maria Ramovic</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                              Runner
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        $ 863.45
-                      </td>
-                      <td class="px-4 py-3 text-xs">
-                        <span
-                          class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"
-                        >
-                          Approved
-                        </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        6/10/2020
-                      </td>
-                    </tr>
-
-                    <tr class="text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <!-- Avatar with inset shadow -->
-                          <div
-                            class="relative hidden w-8 h-8 mr-3 rounded-full md:block"
-                          >
-                            <img
-                              class="object-cover w-full h-full rounded-full"
-                              src="https://images.unsplash.com/photo-1566411520896-01e7ca4726af?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
-                              alt=""
-                              loading="lazy"
-                            />
-                            <div
-                              class="absolute inset-0 rounded-full shadow-inner"
-                              aria-hidden="true"
-                            ></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Hitney Wouston</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                              Singer
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        $ 863.45
-                      </td>
-                      <td class="px-4 py-3 text-xs">
-                        <span
-                          class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"
-                        >
-                          Approved
-                        </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        6/10/2020
-                      </td>
-                    </tr>
-
-                    <tr class="text-gray-700 dark:text-gray-400">
-                      <td class="px-4 py-3">
-                        <div class="flex items-center text-sm">
-                          <!-- Avatar with inset shadow -->
-                          <div
-                            class="relative hidden w-8 h-8 mr-3 rounded-full md:block"
-                          >
-                            <img
-                              class="object-cover w-full h-full rounded-full"
-                              src="https://images.unsplash.com/flagged/photo-1570612861542-284f4c12e75f?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
-                              alt=""
-                              loading="lazy"
-                            />
-                            <div
-                              class="absolute inset-0 rounded-full shadow-inner"
-                              aria-hidden="true"
-                            ></div>
-                          </div>
-                          <div>
-                            <p class="font-semibold">Hans Burger</p>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">
-                              10x Developer
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        $ 863.45
-                      </td>
-                      <td class="px-4 py-3 text-xs">
-                        <span
-                          class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100"
-                        >
-                          Approved
-                        </span>
-                      </td>
-                      <td class="px-4 py-3 text-sm">
-                        6/10/2020
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div
-                class="grid px-4 py-3 text-xs font-semibold tracking-wide text-gray-500 uppercase border-t dark:border-gray-700 bg-gray-50 sm:grid-cols-9 dark:text-gray-400 dark:bg-gray-800"
-              >
-                <span class="flex items-center col-span-3">
-                  Showing 21-30 of 100
-                </span>
-                <span class="col-span-2"></span>
-                <!-- Pagination -->
-                <span class="flex col-span-4 mt-2 sm:mt-auto sm:justify-end">
-                  <nav aria-label="Table navigation">
-                    <ul class="inline-flex items-center">
-                      <li>
+                      <td><%= data.order_placed_on %></td>
+                      <td><%= data.expectedDelivery %></td>
+                      <td>
+                        <div class="d-flex flex-column">
                         <button
-                          class="px-3 py-1 rounded-md rounded-l-lg focus:outline-none focus:shadow-outline-purple"
-                          aria-label="Previous"
+                          type="button"
+                          class="btn btn-primary btn-sm"
+                          data-bs-toggle="modal"
+                          data-bs-target="#model-product-<%= data.order_id %>"
                         >
-                          <svg
-                            aria-hidden="true"
-                            class="w-4 h-4 fill-current"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                              clip-rule="evenodd"
-                              fill-rule="evenodd"
-                            ></path>
-                          </svg>
+                          Products
                         </button>
-                      </li>
-                      <li>
-                        <button
-                          class="px-3 py-1 rounded-md focus:outline-none focus:shadow-outline-purple"
+                        <div
+                          class="modal fade"
+                          id="model-product-<%= data.order_id %>"
+                          tabindex="-1"
+                          aria-labelledby="product-<%= data.order_id %>Label"
+                          aria-hidden="true"
                         >
-                          1
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          class="px-3 py-1 rounded-md focus:outline-none focus:shadow-outline-purple"
-                        >
-                          2
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          class="px-3 py-1 text-white transition-colors duration-150 bg-purple-600 border border-r-0 border-purple-600 rounded-md focus:outline-none focus:shadow-outline-purple"
-                        >
-                          3
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          class="px-3 py-1 rounded-md focus:outline-none focus:shadow-outline-purple"
-                        >
-                          4
-                        </button>
-                      </li>
-                      <li>
-                        <span class="px-3 py-1">...</span>
-                      </li>
-                      <li>
-                        <button
-                          class="px-3 py-1 rounded-md focus:outline-none focus:shadow-outline-purple"
-                        >
-                          8
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          class="px-3 py-1 rounded-md focus:outline-none focus:shadow-outline-purple"
-                        >
-                          9
-                        </button>
-                      </li>
-                      <li>
-                        <button
-                          class="px-3 py-1 rounded-md rounded-r-lg focus:outline-none focus:shadow-outline-purple"
-                          aria-label="Next"
-                        >
-                          <svg
-                            class="w-4 h-4 fill-current"
-                            aria-hidden="true"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                              clip-rule="evenodd"
-                              fill-rule="evenodd"
-                            ></path>
-                          </svg>
-                        </button>
-                      </li>
-                    </ul>
-                  </nav>
-                </span>
-              </div>
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h1
+                                    class="modal-title fs-5"
+                                    id="product-<%= data.order_id %>Label"
+                                  >
+                                    Products
+                                  </h1>
+                                  <button
+                                    type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"
+                                  ></button>
+                                </div>
+                                <div class="modal-body">
+                                  <div class="p-3">
+                                    <div class="d-flex flex-column justify-content-center">
+                                      <% data.product.forEach(element => { %>
+                                        <div
+                                          class="d-flex align-items-center gap-5"
+                                          style="border: 0.5px solid #d9d9d9"
+                                        >
+                                          <div>
+                                            <img
+                                              src="<%= element.image[2].url %>"
+                                              alt=""
+                                              style="width: 100px; height: 100px"
+                                            />
+                                          </div>
+                                          <div>
+                                            <%= element.name %>
+                                          </div>
+                                          <div>
+                                            <% data.products.forEach(ele => { %>
+                                              <% if (element._id+''== ele.product_id+'') { %>
+                                                Qty: <%= ele.quantity %>
+                                                <!-- Size: <%= ele.size %> -->
+                                                <% } %>
+                                            <% }) %>
+                                          </div>
+                                          <div>Price: <%= element.price %></div>
+                                        </div>
+                                      <% }) %>
+                                      <div class="d-flex justify-content-center">
+                                        <h4>Total Price: Rs.<%= data.totalAmount %> </h4>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="modal-footer">
+                                  <button
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal"
+                                  >
+                                    Close
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <button type="button" class="btn btn-primary btn-sm mt-1" data-bs-toggle="modal" data-bs-target="#address-<%= data.order_id %>">
+                            Address
+                          </button>
+                          
+                          <!-- Modal -->
+                          <div class="modal fade" id="address-<%= data.order_id %>" tabindex="-1" aria-labelledby="address-<%= data.order_id %>Label" aria-hidden="true">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h1 class="modal-title fs-5" id="address-<%= data.order_id %>Label">Address</h1>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                  <% data.address.forEach(element => { %>
+                                   <address>
+                                    <%= element.name %>, <br>
+                                    <%= element.address %>, <br>
+                                    <%= element.city %>, <%= element.state %>,<br>
+                                    India,<br>
+                                    <%= element.pincode %> <br>
+                                    
+                                   </address>
+                                  <% }) %>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <% if (data.orderStatus != 'Completed') { %>
+                          <% if (data.orderStatus != 'Cancelled') { %>
+                            <div class="d-flex flex-column align-items-center">
+                              <!-- <%= data.orderStatus != 'Cancelled' %>  -->
+                              <button class="btn btn-danger btn-sm" id="ed<%= data._id %>" onclick="enable('<%= data._id %>')">
+                                  <i class="material-symbols-outlined">edit</i>
+                              </button>
+                              <button class="btn btn-danger btn-sm" onclick="done('<%= data._id %>')" style="display: none;" id="ch<%= data._id %>">
+                                  <i class="material-symbols-outlined">
+                                      check
+                                      </i>
+                              </button>
+                          <% } %>
+                        <% } %>
+                        <% if (data.orderStatus == 'Pending') { %>
+                          <button type="button" class="btn btn-danger btn-sm mt-1" data-bs-toggle="modal" data-bs-target="#model-del-<%= data.order_id %>">
+                            Cancel
+                          </button>
+                          <div class="modal fade" id="model-del-<%= data.order_id %>" tabindex="-1" aria-labelledby="model-del-<%= data.order_id %>Label" aria-hidden="true">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h1 class="modal-title fs-5" id="model-del-<%= data.order_id %>Label">Order Completed</h1>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                  Are you certain you want to cancel this order?
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                  <button type="button" class="btn btn-primary" onclick="cancel('<%= data._id %>')">Yes</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        <% } %>
+                          <% if (data.paymentStatus == 'Paid' && data.orderStatus == 'Delivered') { %>
+                            <button type="button" class="btn btn-danger btn-sm mt-1" data-bs-toggle="modal" data-bs-target="#model-com-<%= data.order_id %>">
+                              Completed
+                            </button>
+                          <% } %>
+                          <div class="modal fade" id="model-com-<%= data.order_id %>" tabindex="-1" aria-labelledby="model-com-<%= data.order_id %>Label" aria-hidden="true">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h1 class="modal-title fs-5" id="model-com-<%= data.order_id %>Label">Order Completed</h1>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                  Are you certain the order has been completed? (Once an order has been completed, no further changes can be made.)
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                  <button type="button" class="btn btn-primary" onclick="complete('<%= data._id %>')">Yes</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                      </div>
+                      </td>
+                  </tr>
+                  <% }) %>
+                </tbody> 
+              </table>
             </div>
-            </body>
-            </html>
+      </div>
+    </section>
+<script>
+    $("#menu-btn").click(function () {
+      $("#menu").toggleClass("active");
+    });
+    $(document).ready(function () {
+    $('#ptable').DataTable();
+    });
+    function enable(id) {
+        document.getElementById("ps"+id).disabled=false;
+        document.getElementById("or"+id).disabled=false;
+        document.getElementById("ed"+id).style.display='none';
+        document.getElementById("ch"+id).style.display='block';
+    }
+    function done(id) {
+        document.getElementById("ps"+id ).disabled=true;
+        document.getElementById("or"+id ).disabled=true;
+        document.getElementById("ed"+id).style.display='block';
+        document.getElementById("ch"+id).style.display='none';
+        const paymentstat = document.getElementById("ps"+id ).value;
+        const orderstat = document.getElementById("or"+id ).value;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        $.ajax({
+          url: '/admin/changestatus',
+          data: {
+              orderID: id,
+              paymentStatus: paymentstat,
+              orderStatus: orderstat,
+          },
+          method: 'post',
+          success: () => {
+              // document.getElementById('quantity').innerHTML = Number(qty) + Number(count);
+              location.reload();
+          },
+      });
+    }
+    function complete(id) {
+      $.ajax({
+          url: '/admin/ordercompleted',
+          data: {
+              orderID: id,
+          },
+          method: 'post',
+          success: () => {
+              // document.getElementById('quantity').innerHTML = Number(qty) + Number(count);
+              location.reload();
+          },
+      });
+    }
+    function cancel(id) {
+      $.ajax({
+          url: '/admin/ordercancel',
+          data: {
+              orderID: id,
+          },
+          method: 'post',
+          success: () => {
+              // document.getElementById('quantity').innerHTML = Number(qty) + Number(count);
+              location.reload();
+          },
+      });
+    }
+  </script>
+  <style>
+    #menu .items li:nth-child(5) {
+      border-left: 4px solid #fff;
+    }
+  </style>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+    crossorigin="anonymous"
+  ></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+</body>
+</html>
+</body>
+</html>

@@ -1,6 +1,15 @@
 const mongoose = require("mongoose");
 const Category = require("./categoryModel");
+
+
+const imageSchema = new mongoose.Schema({
+    url:String,
+    filename:String
+});
+
 const productSchema = new mongoose.Schema({
+
+
 
     name: {
         type:String,
@@ -15,10 +24,12 @@ const productSchema = new mongoose.Schema({
         type:Number
         
     },
-    image: {
-        type:String
+    image: [{
+        url:String,
+        filename:String
         
-    },
+    }],
+    
     stock: {
         type:String
         
