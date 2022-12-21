@@ -19,6 +19,7 @@
         <th scope="col"class="col-3 col-md-3 col-lg-3 col-xl-2 text-center">Payment Method</th>
         <th scope="col"class="col-3 col-md-3 col-lg-3 col-xl-2 text-center">Order Status</th>
         <th scope="col"class="col-3 col-md-3 col-lg-3 col-xl-2 text-center">Delivery Date</th>
+        <th scope="col"class="col-3 col-md-3 col-lg-3 col-xl-2 text-center">Product Details</th>
         
       </tr>
     </thead>
@@ -59,9 +60,87 @@
             <%= data.expectedDelivery %>
         </td>
 
+        <td>
+
+        <div>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#model-<%= data.order_id %>"
+          >
+            Products
+          </button>
+        </div>
+      </div>
+      
+      <div
+        class="modal fade"
+        id="model-<%= data.order_id %>"
+        tabindex="-1"
+        aria-labelledby="<%= data.order_id %>Label"
+        aria-hidden="true"
+      >
+      <br><br><br><br><br><br><br>
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1
+                class="modal-title fs-5"
+                id="<%= data.order_id %>Label"
+              >
+                Products
+              </h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div class="p-3">
+                <div class="d-flex flex-column justify-content-center">
+                  <% productData.forEach(element => { %> <% if
+                  (data.order_id == element.order_id+'') { %>
+                  <div
+                    class="d-flex justify-content-start"
+                    style="border: 0.5px solid #d9d9d9"
+                  >
+                    <div>
+                      <img
+                        src="<%= element.productDetail.image[2].url %>"
+                        alt=""
+                        style="width: 100px; height: 100px"
+                      />
+                    </div>
+                    <div>
+                      <div>
+                        <%= element.productDetail.name %>
+                      </div>
+                      <div>Qty: <%= element.productQuantity %></div>
+                      <div>Total: <%= element.productPrice %></div>
+                    </div>
+                  </div>
+                  <% } %> <% }) %>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </td>
+
+
         <% }) %> <% } %>
 </tbody>
-  </table>
+</table>
 </div>
 </div>
 </div>

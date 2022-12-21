@@ -1,5 +1,6 @@
 const User = require('../models/userModel');
 const mongoose = require('mongoose');
+const crypto = require("crypto");
 
 
 const bcrypt = require('bcrypt');
@@ -11,7 +12,7 @@ const Cart = require('../models/cartModel');
 const Address = require('../models/addressModel');
 const Order = require('../models/orderModel');
 const Wishlist = require('../models/wishlistModel')
-const instance = require('../middleware/razorpay');
+const instance = require('../middleware/razorPay');
 const { count } = require('../models/userModel');
 const { resolveContent } = require('nodemailer/lib/shared');
 const { findOne } = require('../models/adminModel');
@@ -226,7 +227,7 @@ const PostLogin = async(req,res)=>{
     }
 
 })
-console.log(user)
+// console.log(user)
 }
 
     catch(error){
@@ -284,8 +285,21 @@ const GetShop = async(req,res)=>{
 
         const cat = await Category.find()
 
+        var search = '';
+        if(req.query.search){
+            search = req.query.search;
+        }
+
+        const productdata = await Product.find({
+            $or:[
+                { name : { $regex: '.*'+search+'.*' }},
+                { description : { $regex: '.*'+search+'.*' }},
+
+            ]
+        })
+
        
-         res.render('user/shop',{allproducts,cat});    
+         res.render('user/shop',{allproducts,cat,productdata});    
        
 
         }
@@ -321,19 +335,7 @@ const GetContact = async(req,res)=>{
         console.log(error.message);
     }
 }
-// Get my account 
 
-const GetMyAcct = async(req,res)=>{
-    
-
-    try{
-         res.render('user/myaccount');    
-
-
-    }catch(error){
-        console.log(error.message);
-    }
-}
 
 
 // Get categories
@@ -421,7 +423,7 @@ try{
     ]).then((result) =>{
         const sum = result.reduce((accumulator,object) => accumulator + object.productPrice, 0);
 
-        console.log(result);
+        // console.log(result);
 
 
         
@@ -537,7 +539,7 @@ const GetCartProducts = (req, res) => {
                             { $push: { products: { product_id: pid, quantity: 1 } } },
                         )
                             .then((doc) => {
-                                console.log(doc);
+                                // console.log(doc);
                                 res.redirect(`/singleshop/${pid}`);
                             });
                     } else {
@@ -575,11 +577,6 @@ const GetCartProducts = (req, res) => {
 
 
 
-
-
-
-
-
 // Get Search 
 
 const GetSearch = async(req,res)=>{
@@ -587,11 +584,28 @@ const GetSearch = async(req,res)=>{
 
     try{
 
-        var search = req.body.search;
-        var product_data = await Product.find({"name":{$regex: ".*"+ search +".*",$options:'i'}});  
-        if(product_data.length > 0){
-           res.render('user/shop',{date: product_data});
-        }
+        // var search = '';
+        // if(req.query.search){
+        //     search = req.query.search;
+        // }
+
+        // const productdata = await Product.find({
+        //     $or:[
+        //         { name : {$regex: '.*'+search+'.*' }},
+        //         { price : {$regex: '.*'+search+'.*' }},
+        //         { description : {$regex: '.*'+search+'.*' }},
+
+        //     ]
+        // })
+
+        // var searchvalue = req.body.search;
+        // Product.find({
+        //     $and: [{ product_status: 'active' }, { stock: { $gt: 0 } }, {
+        //         name: new RegExp(searchvalue, 'i'),
+        //     }],
+        // }).then((result) => {
+        //     res.render('user/singleshop',{allData: result});
+        // } )
     }catch(error){
         console.log(error.message);
     }
@@ -667,6 +681,187 @@ const GetAddress = async(req,res)=>{
        
 }
 
+// Profile
+
+const profileRender = (req, res) => {
+    try {
+        const uid = req.session.user_id;
+        // console.log(uid);
+        User.findOne({ user_id: uid }).then((userdoc) => {
+            Address.find({ user_id: uid }).then((address) => {
+
+                console.log(address);
+                console.log(uid);
+                res.render('user/myaccount', { user: userdoc, address });
+            }).catch(() => {
+                console.log(error1);
+            });
+        }).catch(() => {
+            console.log(error2);
+        });
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
+// profile add address
+
+const addAddressRender = (req, res) => {
+    try {
+
+        res.render("user/profileaddress");
+       
+        
+        
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
+
+// post profile address
+
+const PostProfile =  async (req, res) => {
+
+    try {
+
+        const uid = req.session.user_id;
+
+        
+        const userprofile = new Address({
+
+            user_id: uid,  
+            address : req.body.address,
+            state : req.body.state,
+            city : req.body.city,
+            pincode : req.body.pincode,
+       
+           });
+       
+       
+           const userprofileData = await userprofile.save();
+       
+               res.redirect("/myaccount");
+        
+    } catch (error) {
+
+        console.log(error.message);
+        
+    }
+       
+}
+
+// edit profile
+
+const editProfile = (req, res) => {
+    try {
+        const { aid } = req.params;
+        Address.findOne({ _id: aid }).then((doc) => {
+            res.render('user/editaddress', { doc });
+        }).catch(() => {
+            console.log(error);
+        });
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
+// post edit profile 
+
+const editAddressPost = (req, res) => {
+    try {
+        const { aid } = req.params;
+        const {
+            address,
+            state,
+            city,
+            pincode,
+        } = req.body;
+       Address.findByIdAndUpdate(
+            { _id: aid },
+            {
+                address, state, city, pincode,
+            },
+        ).then(() => {
+            res.redirect('/myaccount');
+        }).catch(() => {
+           console.log(error);
+        });
+    } catch (error) {
+       console.log(error.message);
+    }
+};
+
+
+const deleteAddress = (req, res) => {
+    try {
+        const { aid } = req.params;
+        Address.findByIdAndDelete({ _id: aid }).then(() => {
+            res.redirect('/myaccount');
+        }).catch(() => {
+            console.log(error);
+        });
+    } catch (error) {
+       console.log(error.message);
+    }
+};
+
+
+// Change password
+
+const GetChangePassword = (req,res) => {
+    try {
+        res.render('user/changepassword');
+        
+    } catch (error) {
+
+        console.log(error.message);
+        
+    }
+}
+
+
+const PostChangePassword = async (req,res) => {
+    try {
+
+        const uid = req.session.user_id;
+        const { password, confirmpassword } = req.body;
+
+        const hash = await bcrypt.hash(password,10);
+
+        User.findOne({user_id: uid}).then((result) => {
+            if (password === confirmpassword) {
+
+                User.findOneAndUpdate({user_id : uid}, {password: hash}).then(() => {
+
+                    res.redirect('/myaccount')
+                 });
+
+                
+            } else {
+
+                res.render('user/changepassword',{message: 'password and confirm password didint match'});
+                
+            }
+        })
+   
+        
+    } catch (error) {
+
+        console.log(error.message);
+        
+    }
+}
+
+
+
+
+
+
+
+
+
+
 
 // Get Checkout 
 
@@ -738,107 +933,111 @@ const GetCheckout = async(req,res)=>{
 
 
 
-// confirm order
- 
 const confirmOrder = (req, res) => {
-    const uid = req.session.user_id;
-    const paymethod = req.body.pay;
-    const adrs = req.body.address;
-    // const { Order } = model;
-
-    User.findOne({ user_id: uid }).then((userData) => {
-        Cart.aggregate([
-            {
-                $match: { user_id: uid },
-            },
-            {
-                $unwind: '$products',
-            },
-            {
-                $project: {
-                    productItem: '$products.product_id',
-                    productQuantity: '$products.quantity',
+    try {
+        const uid = req.session.user_id;
+        const paymethod = req.body.pay;
+        const adrs = req.body.address;
+        console.log(paymethod)
+        User.findOne({ user_id: uid }).then((userData) => {
+            Cart.aggregate([
+                {
+                    $match: { user_id: uid },
                 },
-            },
-            {
-                $lookup: {
-                    from: 'products',
-                    localField: 'productItem',
-                    foreignField: '_id',
-                    as: 'productDetail',
+                {
+                    $unwind: '$products',
                 },
-            },
-            {
-                $project: {
-                    productItem: 1,
-                    productQuantity: 1,
-                    productDetail: { $arrayElemAt: ['$productDetail', 0] },
-                },
-            },
-            {
-                $addFields: {
-                    productPrice: {
-                        $sum: { $multiply: ['$productQuantity', '$productDetail.price'] },
+                {
+                    $project: {
+                        productItem: '$products.product_id',
+                        productQuantity: '$products.quantity',
+                        productSize: '$products.size',
                     },
                 },
-            },
-        ])
-            .exec().then((result) => {
-                
-                for (let i = 0; i < result.length; i++) {
-                    const csctock = result[i].productDetail.stock - result[i].productQuantity;
-                    Product.findByIdAndUpdate(
-                       
-                        { _id: result[i].productDetail._id },
-                        { stock: csctock },
-                    ).then(() => {
-                    }).catch((erp) => {
-                        console.log(erp);
-                    });
-                }
-                
-                const sum = result
-                    .reduce((accumulator, object) => accumulator + object.productPrice, 0);
-                Cart.findOne({ user_id: uid }).then((cartData) => {
-
-                    const order = new Order({
-                        order_id: Date.now(),
-                        user_id: uid,                       
-                        address: adrs,
-                        order_placed_on: moment().format('DD-MM-YYYY'),
-                        products: cartData.products,
-                        totalAmount: sum,
-                        paymentMethod: paymethod,
-                        expectedDelivery: moment().add(4, 'days').format('MMM Do YY'),
-                    });
+                {
+                    $lookup: {
+                        from: 'products',
+                        localField: 'productItem',
+                        foreignField: '_id',
+                        as: 'productDetail',
+                    },
+                },
+                {
+                    $project: {
+                        productItem: 1,
+                        productQuantity: 1,
+                        productSize: 1,
+                        productDetail: { $arrayElemAt: ['$productDetail', 0] },
+                    },
+                },
+                {
+                    $addFields: {
+                        productPrice: {
+                            $sum: { $multiply: ['$productQuantity', '$productDetail.price'] },
+                        },
+                    },
+                },
+            ])
+                .exec().then((result) => {
                    
-                    order.save().then((done) => {
+                    for (let i = 0; i < result.length; i++) {
+                        const csctock = result[i].productDetail.stock - result[i].productQuantity;
+                        Product.findByIdAndUpdate(
+                            
+                            { _id: result[i].productDetail._id },
+                            { stock: csctock },
+                        ).then(() => {
+                        }).catch(() => {
+                            res.redirect('/500');
+                        });
+                    }
+                    const sum = result
+                        .reduce((accumulator, object) => accumulator + object.productPrice, 0);
+                    Cart.findOne({ user_id: uid }).then((cartData) => {
+                        const order = new Order({
+                            order_id: Date.now(),
+                            user_id: uid,
+                          
+                            address: adrs,
+                            order_placed_on: moment().format('DD-MM-YYYY'),
+                            products: cartData.products,
+                            totalAmount: sum,
+                            paymentMethod: paymethod,
+                            expectedDelivery: moment().add(4, 'days').format('MMM Do YY'),
+                        });
                         
-                        const oid = done._id;
-                        Cart.deleteOne({ user_id: uid }).then(() => {
-                            if (paymethod === 'cod') {
-                                res.json([{ success: true, oid }]);
-                            } else if (paymethod === 'online') {
-                                console.log('online');
-                                const amount = done.totalAmount * 100;
-                                const options = {
-                                    amount,
-                                    currency: 'INR',
-                                    receipt: `${oid}`,
-                                };
-                                instance.orders.create(options, (err, orders) => {
-                                    if (err) {
-                                        console.log(err);
-                                    } else {
-                                        res.json([{ success: false, orders }]);
-                                    }
-                                });
-                            }
+                        order.save().then((done) => {
+                            
+                            const oid = done._id;
+                            Cart.deleteOne({ user_id: uid }).then(() => {
+                                if (paymethod === 'cod') {
+                                    res.json([{ success: true, oid }]);
+                                } else if (paymethod === 'Online') {
+                                    console.log("hii ");
+                                    const amount = done.totalAmount * 100;
+                                    const options = {
+                                        amount,
+                                        currency: 'INR',
+                                        receipt: `${oid}`,
+                                    };
+                                    instance.orders.create(options, (err, orders) => {
+                                        if (err) {
+                                            console.log("error");
+                                            console.log(err);
+                                        } else {
+                                            console.log("success")
+                                            res.json([{ success: false, orders }]);
+                                        }
+                                    });
+                                }
+                            });
                         });
                     });
                 });
-            });
-    });
+        });
+    } catch (error) {
+        console.log(error.message);
+    }
 };
 
 
@@ -846,7 +1045,7 @@ const confirmOrder = (req, res) => {
 // order success page
 
 const orderSuccess = (req, res) => {
-    console.log(req.params);
+    // console.log(req.params);
     const oid = mongoose.Types.ObjectId(req.params.oid);
     Order.aggregate([
         { $match: { _id: oid } },
@@ -867,8 +1066,6 @@ const orderSuccess = (req, res) => {
             },
         },
     ]).then((result) => {
-        console.log(result);
-        console.log('order_id');
         res.render('user/orderSuccess', {
             id: result[0].order_id,
             amount: result[0].totalAmount,
@@ -884,7 +1081,7 @@ const orderSuccess = (req, res) => {
 const orderHistory = (req, res) => {
     // const name = req.session.name;
     const uid = req.session.user_id;
-    console.log(uid);
+    // console.log(uid);
     // console.log(name);
     Order.aggregate([
         {
@@ -928,7 +1125,7 @@ const orderHistory = (req, res) => {
     ]).then((result) => {
         // console.log(result);
        
-        Order.find({ user_id: '638adce7c82d1d6532908d45' }).then((doc) => {
+        Order.find({ user_id: uid }).then((doc) => {
             
             res.render('user/orderhistory', {
                 name, count: 0, productData: result, allData: doc, items: 0,
@@ -942,7 +1139,8 @@ const orderHistory = (req, res) => {
 const verifyPayment = (req, res) => {
     
     const details = req.body;
-    let hmac = crypto.createHmac('sha256', 'uYglaEyoaZ1j8MXmPiCDHfZi');
+    // console.log(details);
+    let hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
     hmac.update(
        
         details.payment.razorpay_order_id +
@@ -955,8 +1153,8 @@ const verifyPayment = (req, res) => {
     
     if (hmac == details.payment.razorpay_signature) {
         const objId = mongoose.Types.ObjectId(details.order.receipt);
-        console.log(objId);
-        model.Order
+        // console.log(objId);
+        Order
             .updateOne({ _id: objId }, { $set: { paymentStatus: 'Paid' } })
             .then(() => {
                 res.json({ success: true, oid: details.order.receipt });
@@ -966,7 +1164,7 @@ const verifyPayment = (req, res) => {
                 res.json({ status: false, err_message: 'payment failed' });
             });
     } else {
-        res.json({ status: false, err_message: 'payment failed' });
+        res.json({ status: false, err_message: 'payment faileded' });
     }
 };
 
@@ -983,107 +1181,175 @@ const paymentFailure = (req, res) => {
 
 // Get Wishlist 
  
+    const GetWishlist = async (req, res) => {
+        try{
 
-const GetWishlist = async(req,res)=>{
+            const uid = req.session.user_id;
 
-    try{
-    
-        const uid = req.session.user_id;
-    
-    
+            const allproducts = await Product.find()
+        
+        
+            
+        
+            Wishlist.aggregate([
+                {
+                    $match: {user_id: uid},
+                },
+                {
+                    $unwind:'$products',
+                },
+                {
+                    $project: {
+                        productitem : '$products.product_id',
+                        productquantity: '$products.quantity',
+                    },
+                },
+        
+                {
+                    $lookup: {
+                        from:'products',
+                        localField:'productitem',
+                        foreignField:'_id',
+                        as:'productDetail',
+                    },
+                },
+        
+                {
+                    $project: {
+                        productitem: 1,
+                        productquantity: 1,
+                        productDetail: {$arrayElemAt:['$productDetail',0]},
+                    },
+                },
+                {
+                    $addFields: {
+                        productPrice: {
+                            $sum: {$multiply: ['$productquantity', '$productDetail.price']}
+                        }
+                    }
+                }
+            ]).then((result) =>{
+                const sum = result.reduce((accumulator,object) => accumulator + object.productPrice, 0);
+        
+                // console.log(result);
+        
+        
+                
+        
+                
+        
+                const count = result.length;
+        
+                
+                
+                res.render('user/wishlist',{allData: result, count, sum, allproducts, name: req.session.name});
+
+               
+                
+                
+        
+                
+                
+            });
+        
+        
+        }
+          catch(error){
+        
+                console.log(error.message);
+            }
+        }
         
     
-        const wishlistData = await Wishlist.aggregate([
-            {
-                
-                $match: { userId: uid },
-            },
-            {
-                $unwind: '$product',
-            },
-            {
-                $project: {
-                    productItem: '$product.productId',
-                },
-            },
-            {
-                $lookup: {
-                    from: 'products',
-                    localField: 'productItem',
-                    foreignField: '_id',
-                    as: 'productDetail',
-                },
-            },
-            {
-                $project: {
-                    productItem: 1,
-                    productDetail: { $arrayElemAt: ['$productDetail', 0] },
-                },
-            },
-        ]);
-        res.render(
-            'user/wishlist',
-            {
-                name: req.session.name,
-                
-                wishlistData,
-                
-            },
     
-    
-    )}
-      catch(error){
-    
-            console.log(error.message);
-        }
-    }
+
     
     // Add to wishlist
 
-    const AddWishlistProducts = (req, res) => {
+    const AddWishlistProducts = async (req, res) => {
+        const pid = req.params.id;
         const uid = req.session.user_id;
-        const { pid } = req.body;
-        const proObj = {
-            productId: pid,
-        };
-        const userWishlist = Wishlist.findOne({ userId: uid });
-        const verify = Cart.findOne(
-            { user_id: uid },
-            { product: { $elemMatch: { productId: pid } } },
-        );
-        if (verify?.products?.length) {
-            res.json({ cart: true });
-        } else {
-            
-            if (userWishlist) {
-                const proExist = userWishlist.product.findIndex(
-                    (product) => product.productId === pid,
-                );
-                if (proExist !== -1) {
-                    res.json({ productExist: true });
-                } else {
-                    Wishlist
-                        .updateOne({ userId: uid }, { $push: { product: proObj } })
-                        .then(() => {
-                            res.json({ success: true });
-                        });
-                }
-            } else {
-                Wishlist
-                    .create({
-                        userId: uid,
-                        product: [
-                            {
-                                productId: pid,
-                            },
-                        ],
-                    })
-                    .then(() => {
-                        res.json({ status: true });
+    
+    
+        Wishlist.findOne({ user_id: uid }).then((result) => {
+            if (result) {
+    
+            Wishlist.findOne(
+                    {
+                        $and: [{ user_id: req.session.user_id },
+                        { products: { $elemMatch: { product_id: pid } } }],
+                    },
+                )
+                    .then((docs) => {
+                        if (!docs) {
+                            Wishlist.findOneAndUpdate(
+                                { user_id: uid },
+                                { $push: { products: { product_id: pid, quantity: 1 } } },
+                            )
+                                .then((doc) => {
+                                    // console.log(doc);
+                                    res.redirect(`/singleshop/${pid}`);
+                                });
+                        } else {
+                            Wishlist.updateOne(
+                                { 'products.product_id': pid },
+                                {
+                                    $inc: { 'products.$.quantity': 1 },
+                                },
+                            ).then(() => {
+                                // console.log(success);
+                                res.redirect('/wishlist');
+                            }).catch((er) => {
+                                console.log(er);
+                            });
+                        }
                     });
+            } else {
+                const wishlist = new Wishlist({
+                    user_id: uid,
+                    products: {
+                        product_id: pid,
+                        quantity: 1,
+                    },
+                });
+                wishlist.save().then(() => {
+                    res.redirect('/wishlist');
+                }).catch((e) => {
+                    console.log(e);
+                });
             }
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+           
+    
+
+// wishlist product remove
+
+const DeleteWishlistPdt = async(req,res)=>{
+    try {
+      const wishid = req.body.wishlist;
+      const pid = req.body.product;
+   
+
+      Wishlist.findOneAndUpdate(
+        { _id: wishid},
+        {
+            $pull: {products : {product_id: pid} }
         }
+        
+      ).then((success)=>{
+
+            res.redirect('/wishlist');
+
+        })
+    }
+    catch(error){
+        console.log(error.message);
+    }
 }
+
   
 
 
@@ -1111,7 +1377,8 @@ const GetSingleshop = async(req,res)=>{
             
 
     }catch(error){
-        res.render('user/404');
+        res.render('404');
+        console.log(error.message);
     }
 }
 
@@ -1156,7 +1423,6 @@ module.exports = {
     GetCartProducts,
     changeproqty,
     DeleteCartPdt,
-    GetMyAcct,
     GetCategories,
     GetAddress,
     PostAddress,
@@ -1167,6 +1433,15 @@ module.exports = {
     orderHistory,
     verifyPayment,
     paymentFailure,
-    AddWishlistProducts
+    AddWishlistProducts,
+    DeleteWishlistPdt,
+    profileRender,
+    addAddressRender,
+    PostProfile,
+    editProfile,
+    editAddressPost,
+    deleteAddress,
+    GetChangePassword,
+    PostChangePassword
     
 }

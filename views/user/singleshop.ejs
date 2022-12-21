@@ -175,7 +175,10 @@
 						<!--  -->
 						<div class="flex-w flex-m p-r-60 p-t-40 respon7">
 							<div class="flex-m bor9 p-l-20 m-r-11">
-								<a href="/wishlist/<%= product._id %>" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail">
+								<a href="/addtowishlist/<%= product._id %>" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2">
+						 		
+										<!-- <a href="/wishlist/<%= product._id%>">Click me</a> -->
+									
 									<!-- data-tooltip="Add to Wishlist" -->
 									<!-- <p><a href="/wishlist/<%= product._id %>" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail"></a></p> -->
 									<i class="zmdi zmdi-favorite"></i>
@@ -220,6 +223,8 @@
 
 
 
+
+
   <style>
     .zoom {
     background-position: 50% 50%;
@@ -237,6 +242,43 @@
     width: 100%;
   }
   </style>
+
+  <!-- <script>
+	 function addWishlistItem(pid) {
+        $.ajax({
+          url: "/addtowishlist",
+          data: {
+            pid,
+          },
+          method: "post",
+          success: () => {
+            swal("Item Added", "Item added to your wishlist", "success")
+            .then(() => {
+              location.reload();
+            });
+          },
+        });
+      }
+  </script> -->
+
+  <!-- <script>
+	function deleteWishlistItem(pid, wishid) {
+        $.ajax({
+          url: "/delete-wishlist-product",
+          data: {
+            pid,
+            wishid,
+          },
+          method: "post",
+          success: () => {
+            swal("Item Removed", "Item removed to your wishlist", "success")
+            .then(() => {
+              location.reload();
+            });
+          },
+        });
+      }
+  </script> -->
 
 
 

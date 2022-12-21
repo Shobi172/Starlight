@@ -11,12 +11,15 @@
     <link rel="stylesheet" href="../../user/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../user/css/magnific-popup.css">
     <link rel="stylesheet" href="../../user/css/jquery-ui.css">
-    <link rel="stylesheet" href="../../user/css/owl.carousel.min.css"
+    <link rel="stylesheet" href="../../user/css/owl.carousel.min.css">
     <link rel="stylesheet" href="../../user/css/owl.theme.default.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="https://unpkg.com/js-image-zoom@0.7.0/js-image-zoom.js" type="application/javascript"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.min.js"></script>
      <link href="/src/jquery.exzoom.css" rel="stylesheet">
+     <script src="https://checkout.razorpay.com/v1/checkout.js">
+
+     </script>
 
     
 
@@ -35,9 +38,9 @@
           <div class="row align-items-center">
 
             <div class="col-6 col-md-4 order-2 order-md-1 site-search-icon text-left">
-              <form action="/search" method="post" class="site-block-top-search">
+              <form action="" method="post" class="site-block-top-search">
                 <span class="icon icon-search2"></span>
-                <input type="text" class="form-control border-0" placeholder="Search">
+                <input type="text" class="form-control border-0" placeholder="Search" name="search" id="search-item" onkeyup="search()">
               </form>
             </div>
 
@@ -51,7 +54,10 @@
             <div class="col-6 col-md-4 order-3 order-md-3 text-right">
               <div class="site-top-icons">
                 <ul>
-                  <li><a href="/myaccount"><span class="icon icon-person"></span></a></li>
+                  <li>
+                  <a href="/myaccount"><span class="icon icon-person"></span></a>
+                  <a href="/orderhistory"></a>
+                  </li>
                   <li><a href="/wishlist"><span class="icon icon-heart-o"></span></a></li>
                   <li>
 
@@ -114,5 +120,32 @@
         </div>
       </nav>
     </header>
+
+    <!-- <script>
+
+      const search = () => {
+
+      const searchbox = document.getElementById("search-item").value.toUpperCase();
+      const storeitems = document.getElementById("block").value.toUpperCase();
+      const product = document.querySelectorAll(".block-4")
+      const pname = document.getElementsByTagName("h3")
+
+      for(var i=0; i<pname.length; i++){
+        let match =  product[i].getElementsByTagName('h3')[0];
+
+        if(match){
+          let textvalue = match.textContent || match.innerHTML
+
+          if(textvalue.toUpperCase().indexOf(searchbox) > -1){
+            product[i].style.display = "";
+
+          }else{
+            product[i].style.display = "none";
+          }
+        }
+      }
+    }
+
+    </script> -->
 
     

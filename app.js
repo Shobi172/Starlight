@@ -66,7 +66,7 @@ app.use('/admin',adminRoute);
 
 // for 404 Page
 
-app.use((req, res, next) => {
+app.use((req, res) => {
     res.status(404);
     res.render('404');  // Render the 404 page
   });

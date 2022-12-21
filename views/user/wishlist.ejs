@@ -24,29 +24,24 @@
                     <th class="product-thumbnail">Image</th>
                     <th class="product-name">Product</th>
                     <th class="product-price">Price</th>
-                    <th class="product-quantity">Stock Status</th>
-                    <th class="product-total">Total</th>
+                    <!-- <th class="product-size">Size</th> -->
+                    <th class="product-quantity">Add to Cart</th>
+                    <!-- <th class="product-total">Total</th> -->
                     <th class="product-remove">Remove</th>
                   </tr>
                 </thead>
 
-    
-                
-                  
-                <% if ( wishlistData.length === 0) { %>
-                  <tr>
-                    <th colspan="6" class="">
-                      Your wishlist is empty...
-                     
-                    </th>
-                  </tr>
-                  <% } %> <% wishlistData.forEach(data => { %>
+            
 
+
+
+                <% allData.forEach(data => { %>
+
+                
+
+                
 
                 <tbody>
-
-                  
-
 
                   <tr>
                     <td class="product-thumbnail">
@@ -54,52 +49,48 @@
                 
                     </td>
                     <td class="product-name">
-                      <h2 class="h5 text-black"></h2>
-                       <%= data.productDetail.name %>
+                      <h2 class="h5 text-black"><%= data.productDetail.name %></h2>
                     </td>
                     <td>₹ <%= data.productDetail.price %></td>
+                    <!-- <td><%= data.productDetail.size %></td> -->
+                    
+
+                    <% allData.forEach(function(product){ %>
+
                     <td>
-                        
-                            <h2 class="h5 text-black"></h2>
-                            in stock
-                         
+                      <!-- <p><a href="/addtocart/<%= product._id %>" class="btn btn-primary btn-lg active">Add To Cart</a></p> -->
+                       
 
                     </td>
+
+                    <% }); %>
+                    
                     <td>
-
-                     ₹ <%= data.productPrice %>
-
-                      
-
-                    </td>
-                    <td>
-                      <button class="btn btn-primary btn-lg active" role="button" onclick="deletecartitem ('<%= data._id %>','<%= data.productDetail._id %>')">Remove</button>
+                      <button class="btn btn-primary btn-lg active" role="button" onclick="deleteWishlistItem ('<%= data._id %>','<%= data.productDetail._id %>')">Remove</button>
+                       
 
                     </td>
                     
-                   
+                    <!-- <td><a href="" class="btn btn-primary btn-sm" onclick="deletecartitem ('<%= data._id %>','<%= data.productDetail._id %>')">X</a></td> -->
                     
                   </tr>
 
                 </tbody>
 
-                <% }) %>
+
+
+                <% }); %>
 
 
 
-            
-
-
-
+    
                 <script>
-                  
-
-                  function deletewishlistitem(cartId,productId){
+                   function deleteWishlistItem(wishlistId,productId){
                     
                     $.ajax({
                       url:'/delete-wishlist-item',
                       data:{
-                        cart:cartId,
+                        wishlist:wishlistId,
                         product:productId,
                         
 
@@ -111,7 +102,6 @@
                     })
 
                   }
-
                 </script>
 
 
@@ -133,20 +123,8 @@
                 <a href="/shop" class="btn btn-primary btn-sm btn-block" role="button" >Continue Shopping</a>
               </div>
             </div>
-            
-            </div>
-          </div>
-
-
-
-
-
-          
-
-
+  
                 
-
-              </div>
             </div>
           </div>
         </div>

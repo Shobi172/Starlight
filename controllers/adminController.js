@@ -18,6 +18,7 @@ const { log } = require("console");
 
 const fs = require('fs');
 const moment = require('moment');
+const Banner = require("../models/bannerModel");
 
 
 
@@ -64,7 +65,33 @@ const PostLogin = async (req, res) => {
 
 const GetDashboard = async (req, res) => {
   try {
-    res.render("admin/dashboard");
+        const userCount = await User.countDocuments({});
+        const productCount = await Product.countDocuments({});
+        const orderData = await Order.find({ orderStatus: { $ne: 'Cancelled' } });
+        const orderCount = await Order.countDocuments({});
+        const pendingOrder = await Order.find({ orderStatus: 'Pending' }).count();
+        const completed = await Order.find({ orderStatus: 'Completed' }).count();
+        const delivered = await Order.find({ orderStatus: 'Delivered' }).count();
+        const cancelled = await Order.find({ orderStatus: 'Cancelled' }).count();
+        const cod = await Order.find({ paymentMethod: 'Cod' }).count();
+        const online = await Order.find({ paymentMethod: 'Online' }).count();
+        const totalAmount = orderData.reduce((accumulator, object) => {
+            
+            return (accumulator += object.totalAmount);
+        }, 0);
+        res.render("admin/dashboard", {
+            usercount: userCount,
+            productcount: productCount,
+            totalamount: totalAmount,
+            ordercount: orderCount,
+            pending: pendingOrder,
+            completed,
+            delivered,
+            cancelled,
+            cod,
+            online,
+        });
+   
   } catch (error) {
     console.log(error.message);
   }
@@ -166,15 +193,9 @@ const GetCoupon = async (req, res) => {
   }
 };
 
-// Get Banner
 
-const GetBanner = async (req, res) => {
-  try {
-    res.render("admin/banner");
-  } catch (error) {
-    console.log(error.message);
-  }
-};
+
+
 
 // Get Users
 
@@ -424,14 +445,123 @@ const CatProduct = async (req, res) => {
   }
 };
 
+
+// sales report
+
+const GetSalesreport = async (req, res) => {
+  try {
+      
+      const monthstart = moment().startOf('month');
+      const monthend = moment().endOf('month');
+      
+      const monthReport = await Order.aggregate([
+        {
+            $match: {
+                createdAt: {
+                    $gte: monthstart.toDate(),
+                    $lte: monthend.toDate(),
+                },
+            },
+        },
+        {
+            $lookup:
+            {
+                from: 'users',
+                localField: 'user_id',
+                foreignField: 'user_id',
+                as: 'user',
+            },
+        },
+        {
+            $project: {
+                order_id: 1,
+                user: 1,
+                paymentStatus: 1,
+                totalAmount: 1,
+                orderStatus: 1,
+            },
+        },
+    ]);
+    res.render('admin/salesreport', { month: monthReport });
+  }
+  catch (error) {
+    console.log(error.message);
+}
+};
+
+// const Getbanner = (req,res) => {
+//   try {
+
+//     const banner = Banner.find();
+//     res.render('admin/banner',{allData : banner});
+    
+//   } catch (error) {
+
+//     console.log(error.message);
+    
+//   }
+// }
+
+// const addbanner = (req,res) => {
+//   try {
+
+//     res.render('admin/addbanner');
+    
+//   } catch (error) {
+
+//     console.log(error.message);
+    
+//   }
+// }
+
+// const addbannerpost = async (req,res) => {
+//   try {
+
+//     const banner = new Banner({
+
+//       Heading: req.body.head,
+//       Subheading: req.body.subhead,
+//     });
+
+//     banner.image = req.files.map((f)=>({url:f.path, filename:f.filename}))
+
+//     const banneritm = await banner.save();
+
+//     res.render('admin/banner');
+    
+//   } catch (error) {
+
+//     console.log(error.message);
+    
+//   }
+// }
+
+// const deletebanner = (req, res) => {
+ 
+//     try {
+//       const id = req.params.id;
+  
+//        Product.findOneAndDelete({ _id: id });
+  
+//       res.redirect("/admin/banner");
+//     } catch (error) {
+//       console.log(err);
+//     }
+// };
+
+
+
+
+
 module.exports = {
-  GetBanner,
+  // Getbanner,
   GetCoupon,
   GetDashboard,
   GetLogin,
   GetLogout,
   GetOrder,
   GetUsers,
+  GetSalesreport,
   PostLogin,
   blockUser,
   unBlockUser,
@@ -450,5 +580,8 @@ module.exports = {
   CatProduct,
   OrderStatus,
   OrderCompleted,
-  OrderCancelled
+  OrderCancelled,
+  // addbanner,
+  // addbannerpost,
+  // deletebanner
 };
