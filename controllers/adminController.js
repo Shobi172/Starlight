@@ -4,9 +4,12 @@ const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
 const Order = require("../models/orderModel");
 const Cart = require("../models/cartModel");
+const Coupon = require("../models/couponModel")
 const upload = require("../middleware/imageUpload");
 const multer = require("multer");
 const sharp = require("sharp");
+
+const mongoose = require('mongoose');
 
 
 const bcrypt = require("bcrypt");
@@ -19,6 +22,7 @@ const { log } = require("console");
 const fs = require('fs');
 const moment = require('moment');
 const Banner = require("../models/bannerModel");
+
 
 
 
@@ -64,6 +68,7 @@ const PostLogin = async (req, res) => {
 // Get Dashboard
 
 const GetDashboard = async (req, res) => {
+
   try {
         const userCount = await User.countDocuments({});
         const productCount = await Product.countDocuments({});
@@ -73,12 +78,23 @@ const GetDashboard = async (req, res) => {
         const completed = await Order.find({ orderStatus: 'Completed' }).count();
         const delivered = await Order.find({ orderStatus: 'Delivered' }).count();
         const cancelled = await Order.find({ orderStatus: 'Cancelled' }).count();
-        const cod = await Order.find({ paymentMethod: 'Cod' }).count();
+        const cod = await Order.find({ paymentMethod: 'cod' }).count();
         const online = await Order.find({ paymentMethod: 'Online' }).count();
         const totalAmount = orderData.reduce((accumulator, object) => {
             
             return (accumulator += object.totalAmount);
         }, 0);
+
+        // const allCategories = await Category.find({})
+        // const allOrders = await Order.find({})
+        // console.log(allOrders[0])
+        // allCategories.forEach((item)=>{
+        //   Order.countDocuments({})
+
+        //   item._id
+        // })
+
+        // console.log(allCategories )
         res.render("admin/dashboard", {
             usercount: userCount,
             productcount: productCount,
@@ -181,21 +197,6 @@ const OrderCancelled = (req, res) => {
       res.send('done');
   });
 };
-
-
-// Get Coupon
-
-const GetCoupon = async (req, res) => {
-  try {
-    res.render("admin/coupon");
-  } catch (error) {
-    console.log(error.message);
-  }
-};
-
-
-
-
 
 // Get Users
 
@@ -319,9 +320,6 @@ const DeleteCategory = async (req, res) => {
 const GetProduct = async (req, res) => {
   if (req.session.admin_id) {
     const allproducts = await Product.find().populate('category');
-
-    
-
     res.render("admin/product", { allproducts });
   } else {
     res.redirect("/admin/login");
@@ -340,6 +338,7 @@ const AddProduct = async (req, res) => {
 
 
 const PostProduct = async (req, res) => {
+  console.log("hiiiii")
 
   try{
     
@@ -363,11 +362,11 @@ const PostProduct = async (req, res) => {
 
        const productitm = await newProduct.save();
       
-            // console.log(newProduct);
-            res.redirect("/admin/product");
+            console.log("newProduct");
+            res.redirect(303, "/admin/product");
 
   }catch(error){
-    console.log((error.message));
+    console.log(error);
   }
   
 };
@@ -549,6 +548,288 @@ const GetSalesreport = async (req, res) => {
 //     }
 // };
 
+// Get Coupon
+
+const GetCoupon = async (req, res) => {
+  try {
+
+    const coupons = await Coupon.find();
+    // console.log(coupons);
+    
+    res.render("admin/coupon",{allData: coupons});
+    
+    
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+
+// Add Coupon
+
+const AddCoupon = async (req, res) => {
+  try {
+
+    res.render("admin/addcoupon");
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+// Add Coupon  Post
+
+const AddCouponPost = async (req, res) => {
+  try {
+
+    const {code, offer, amount} = req.body;
+
+    const alreadyexist = Coupon.find({coupon_code: code});
+    if ((await alreadyexist).length != 0) {
+
+      res.redirect("/admin/addcoupon");
+      
+    }else{
+
+      const coupon = new Coupon({
+        coupon_code: code,
+        offer,
+        max_amount: amount,
+      });
+      await coupon.save();
+    }
+
+    res.redirect("/admin/coupon");
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+// Deactivate Coupon
+
+const DeactivateCoupon = async(req,res) => {
+  try {
+
+  //   let id=req.params.id;
+  // let cid= mongoose.Types.ObjectId(id)
+  // console.log(cid)
+
+   await Coupon.findByIdAndUpdate({_id: req.params.id},{coupon_status: Deactive});
+
+    res.redirect('/admin/coupon');
+
+    
+  } catch (error) {
+
+    console.log('error');
+    
+  }
+}
+
+// Activate Coupon
+
+const ActivateCoupon = async(req,res) => {
+  try {
+
+  //   let id=req.params.id;
+  // let cid= mongoose.Types.ObjectId(id)
+  // console.log(cid)
+
+    await Coupon.findByIdAndUpdate({_id: req.params.id},{coupon_status: Active});
+
+    res.redirect('/admin/coupon');
+
+    
+  } catch (error) {
+
+    console.log('error');
+    
+  }
+}
+
+// Delete Coupon
+
+const DeleteCoupon = async(req,res) => {
+  try {
+let id=req.params.id;
+  let cid= mongoose.Types.ObjectId(id)
+  console.log(cid)
+
+
+    const deleteCoupon= await Coupon.findByIdAndDelete({_id:cid});
+
+    res.redirect('/admin/coupon');
+
+    
+  } catch (error) {
+
+    console.log(error);
+    
+  }
+}
+
+
+// Edit Coupon
+
+const EditCoupon = async(req,res) => {
+  try {
+
+    let id=req.params.id;
+  let cid= mongoose.Types.ObjectId(id)
+
+  console.log(cid);
+
+    const editcoupon  = await Coupon.findOne({_id: id}).then((doc)=>{
+
+      res.render('admin/coupon',{allData: doc});
+
+    });
+ 
+  } catch (error) {
+
+    console.log('error.message');
+    
+  }
+}
+
+
+// Post Edit Coupon
+
+const PostEditCoupon = async(req,res) => {
+  try {
+
+    const {id,code,offer,amount} = req.body;
+
+    await Coupon.findByIdAndUpdate({_id: id},{coupon_code: code, offer, max_amount: amount});
+
+    res.redirect('/admin/coupon');
+
+    
+  } catch (error) {
+
+    console.log('error.message');
+    
+  }
+}
+
+
+// Order Products
+
+
+const OrderProducts = (async(req,res)=>{
+  console.log("jhhjh");
+
+  console.log(req.params.oid);
+
+  const oid = mongoose.Types.ObjectId(req.params.oid);     
+  console.log(oid);
+
+  const getAddress=await Order.aggregate([
+      {$match:{_id:oid}},
+      {$unwind:"$address"},
+      {$project:{
+         address :"$address"
+      }},
+      {$lookup:{
+          from:"addresses",
+          localField:"address",
+          foreignField:"_id",
+          as:"Address"
+      }},
+      {$unwind:"$Address"},
+      
+  ])
+
+  // console.log("shobin")
+  // console.log(getAddress)
+  // console.log("-----------------------------------------")
+const address=await Order.aggregate([
+
+      {
+          $match:{_id:oid}
+      },
+      {
+          $unwind: '$products',
+      },
+      {
+          $project: {
+              productItem: '$products.product_id',
+              productQuantity: '$products.quantity',
+              order_id: 1,
+              address: 1,
+              expectedDelivery: 1,
+              totalAmount: 1,
+              paymentMethod: 1,
+              paymentStatus: 1,
+              orderStatus: 1,
+              createdAt: 1,
+          },
+      },
+      {
+          $lookup: {
+              from: 'addresses',
+              localField: 'address',
+              foreignField: '_id',
+              as: 'address',
+          },
+      },
+      {
+          $lookup: {
+              from: 'products',
+              localField: 'productItem',
+              foreignField: '_id',
+              as: 'productDetail',
+          },
+      },
+      {
+          $unwind: '$productDetail',
+      },
+      {
+          $addFields: {
+              productPrice: {
+                  $sum: { $multiply: ['$productQuantity', '$productDetail.price'] },
+              },
+          },
+      },
+      
+  ]).then((result) => {
+
+                  // let dis = 0;
+                  // let tamount = 0;
+                  // const coupon = Coupon.findOne({ coupon_code: req.body.coupon });
+                  // const sum = result
+                  //     .reduce((accumulator, object) => accumulator + object.productPrice, 0);
+                  // if (coupon) {
+                  //     dis = (Number(sum) * Number(coupon.offer)) / 100;
+                  //     if (dis > Number(coupon.max_amount)) {
+                  //         dis = Number(coupon.max_amount);
+                  //     }
+                  //     tamount = sum - dis;
+                  // } else {
+                  //     tamount = sum;
+                  // }
+
+                  // console.log(result);
+
+             
+      
+      
+          
+          res.render('admin/orderss', {
+              name, count: 0, productData: result, items: 0,getAddress
+          });
+      
+  });
+
+
+  
+})
+
+
+
+
+
+
+
 
 
 
@@ -581,6 +862,15 @@ module.exports = {
   OrderStatus,
   OrderCompleted,
   OrderCancelled,
+  OrderProducts,
+  AddCoupon,
+  AddCouponPost,
+  DeactivateCoupon,
+  ActivateCoupon,
+  DeleteCoupon,
+  EditCoupon,
+  PostEditCoupon
+
   // addbanner,
   // addbannerpost,
   // deletebanner

@@ -34,10 +34,26 @@ admin_route.post('/ordercompleted',adminAuth,admincontroller.OrderCompleted);
 
 admin_route.post('/ordercancel',adminAuth,admincontroller.OrderCancelled);
 
+admin_route.get('/orders/:oid',adminAuth,admincontroller.OrderProducts);
+
 
 // Coupon Section
 
 admin_route.get('/coupon',adminAuth,admincontroller.GetCoupon);
+
+admin_route.get('/addcoupon',adminAuth,admincontroller.AddCoupon);
+
+admin_route.post('/addcoupon',adminAuth,admincontroller.AddCouponPost);
+
+admin_route.get('/editcoupon/:id',adminAuth,admincontroller.EditCoupon);
+
+admin_route.post('/editcoupon/:id',adminAuth,admincontroller.PostEditCoupon);
+
+admin_route.get('/activate/:id',adminAuth,admincontroller.ActivateCoupon);
+
+admin_route.get('/deactivate/:id',adminAuth,admincontroller.DeactivateCoupon);
+
+admin_route.get('/deletecoupon/:id',adminAuth,admincontroller.DeleteCoupon);
 
 
 // Banner Section

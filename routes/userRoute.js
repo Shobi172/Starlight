@@ -1,5 +1,6 @@
 const express = require("express");
 const user_route = express();
+
 const session = require("express-session");
 
 const userAuth = require("../middleware/userAuth");
@@ -52,6 +53,7 @@ user_route.post('/change-product-quantity',userAuth.verifyUser, usercontroller.c
 user_route.post('/delete-cart-item', usercontroller.DeleteCartPdt);
 
 
+
 // Order Section
 
 user_route.get('/checkout', usercontroller.GetCheckout);
@@ -61,6 +63,8 @@ user_route.post('/orderconfirmed', usercontroller.confirmOrder);
 user_route.get('/ordersuccess/:oid', usercontroller.orderSuccess);
 
 user_route.get('/orderhistory', usercontroller.orderHistory);
+
+user_route.get('/orderproducts/:oid', usercontroller.orderProducts);
 
 
 // Payment Section
@@ -80,6 +84,8 @@ user_route.post('/singleshop', usercontroller.GetSearch);
 user_route.get('/wishlist',userAuth.verifyUser, usercontroller.GetWishlist);
 
 user_route.get('/addtowishlist/:id', usercontroller.AddWishlistProducts);
+
+user_route.get('/wishtocart/:id',userAuth.verifyUser, usercontroller.wishlisttocart);
 
 user_route.post('/delete-wishlist-item', usercontroller.DeleteWishlistPdt);
 
@@ -116,9 +122,9 @@ user_route.get('/changepassword',usercontroller.GetChangePassword);
 user_route.post('/changepassword',usercontroller.PostChangePassword);
 
 
-// Banner Section
+// Coupon Section
 
-
+user_route.post('/couponcheck',usercontroller.couponCheck);
 
 
 // Logout

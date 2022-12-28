@@ -53,17 +53,25 @@
                     </td>
                     <td>₹ <%= data.productDetail.price %></td>
                     <!-- <td><%= data.productDetail.size %></td> -->
+
                     
 
-                    <% allData.forEach(function(product){ %>
+
+
+                    
 
                     <td>
-                      <!-- <p><a href="/addtocart/<%= product._id %>" class="btn btn-primary btn-lg active">Add To Cart</a></p> -->
-                       
-
+                      <a href="/wishtocart/<%= data.productDetail._id %>">add to cart</a>
                     </td>
+                    
 
-                    <% }); %>
+                   
+
+                    
+
+                    
+
+                    
                     
                     <td>
                       <button class="btn btn-primary btn-lg active" role="button" onclick="deleteWishlistItem ('<%= data._id %>','<%= data.productDetail._id %>')">Remove</button>
@@ -77,9 +85,11 @@
 
                 </tbody>
 
-
-
                 <% }); %>
+
+
+
+                
 
 
 
@@ -96,8 +106,13 @@
 
                       },
                       method:'post',
-                      success:() => {
-                        location.reload();
+                      success:(response) => {
+                        console.log(response)
+                        if(response.status==true){
+                          location.reload();
+                        }else{
+                          alert("err")
+                        }
                       }
                     })
 

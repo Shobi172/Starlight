@@ -79,119 +79,18 @@
                       </td>
                       <td><%= data.order_placed_on %></td>
                       <td><%= data.expectedDelivery %></td>
-                      <td>
-                        <div class="d-flex flex-column">
-                        <button
-                          type="button"
-                          class="btn btn-primary btn-sm"
-                          data-bs-toggle="modal"
-                          data-bs-target="#model-product-<%= data.order_id %>"
-                        >
-                          Products
-                        </button>
-                        <div
-                          class="modal fade"
-                          id="model-product-<%= data.order_id %>"
-                          tabindex="-1"
-                          aria-labelledby="product-<%= data.order_id %>Label"
-                          aria-hidden="true"
-                        >
-                            <div class="modal-dialog">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h1
-                                    class="modal-title fs-5"
-                                    id="product-<%= data.order_id %>Label"
-                                  >
-                                    Products
-                                  </h1>
-                                  <button
-                                    type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                  ></button>
-                                </div>
-                                <div class="modal-body">
-                                  <div class="p-3">
-                                    <div class="d-flex flex-column justify-content-center">
+                    </td>
 
-                                      <% data.product.forEach(element => { %>
-                                        <div
-                                          class="d-flex align-items-center gap-5"
-                                          style="border: 0.5px solid #d9d9d9"
-                                        >
-                                          <div>
-                                            <img
-                                              src="<%= element.image[2].url %>"
-                                              alt=""
-                                              style="width: 100px; height: 100px"
-                                            />
-                                          </div>
-                                          <div>
-                                            <%= element.name %>
-                                          </div>
-                                          <div>
-                                            <% data.products.forEach(ele => { %>
-                                              <% if (element._id+''== ele.product_id+'') { %>
-                                                Qty: <%= ele.quantity %>
-                                                <!-- Size: <%= ele.size %> -->
-                                                <% } %>
-                                            <% }) %>
-                                          </div>
-                                          <div>Price: <%= element.price %></div>
-                                        </div>
-                                      <% }) %>
-                                      <div class="d-flex justify-content-center">
-                                        <h4>Total Price: Rs.<%= data.totalAmount %> </h4>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div class="modal-footer">
-                                  <button
-                                    type="button"
-                                    class="btn btn-secondary"
-                                    data-bs-dismiss="modal"
-                                  >
-                                    Close
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <button type="button" class="btn btn-primary btn-sm mt-1" data-bs-toggle="modal" data-bs-target="#address-<%= data.order_id %>">
-                            Address
-                          </button>
-                          
-                          <!-- Modal -->
-                          <div class="modal fade" id="address-<%= data.order_id %>" tabindex="-1" aria-labelledby="address-<%= data.order_id %>Label" aria-hidden="true">
-                            <div class="modal-dialog">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h1 class="modal-title fs-5" id="address-<%= data.order_id %>Label">Address</h1>
-                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                  <% data.address.forEach(element => { %>
-                                   <address>
-                                    <%= element.name %>, <br>
-                                    <%= element.address %>, <br>
-                                    <%= element.city %>, <%= element.state %>,<br>
-                                    India,<br>
-                                    <%= element.pincode %> <br>
-                                    
-                                   </address>
-                                  <% }) %>
-                                </div>
-                                <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                    <td>
+                      <div class="col-3 col-md-3 col-lg-3 col-xl-2 text-center">
+                        <a href="/admin/orders/<%= data._id %>">
+                          <button type="button" class="btn btn-primary btn-sm" 
+                               >
+                                Products
+                            </button></a>
+                        <!-- Button trigger modal -->
                         </div>
-                      </td>
+                    </td>
                       <td>
                         <% if (data.orderStatus != 'Completed') { %>
                           <% if (data.orderStatus != 'Cancelled') { %>

@@ -1,9 +1,8 @@
 <%- include("../partials/userheader.ejs") %>
 
-<section class="mt-5">
+   <section class="mt-5">
       <div class="container">
-        <!-- <div class="d-flex"> -->
-          <form method="post" id="checkout">
+          <form id="checkout">
             <div class="row">
               <div class="order col-md-6 mt-3">
                 <h5 class="white">Order Details:</h5>
@@ -11,15 +10,45 @@
                   style="border: 1px solid; width: 100%;"
                   class="p-4 d9"
                 >
+                <div class="w-100 w-md-50 align-items-center" id="apply" style="display: flex;">
+                  <lable for="">Coupon:</lable>
+                  <div class="d-flex align-items-center ms-2" style="background-color: #fff;border-radius: 10px;">
+                    <input type="text" id="coupon" name="coupon" class="form-control he" placeholder="Enter Coupon Code" style="outline: none; border: none;border-radius: 5px;">
+                    <button class=" btn-primary btn-sm " type="button" onclick="cou('<%= sum %>')">Apply</button>
+                  </div>
+                </div>
+                <div class="d-flex w-100 align-items-center" id="applied" style="display: none !important;">
+                  <lable for="">Coupon:</lable>
+                  <div class="d-flex flex-column align-items-start p-2 ms-2" id="applied" style="border: 1px solid;">
+                    <div style="font-size: 10px;"><a href="" onclick="remove('<%= sum %>')">Remove</a></div>
+                    <h6 id="coup_code">NOW20</h6>
+                    <div> discount of &nbsp;<label for="" id="per"> 20% &nbsp;</label> upto &nbsp;Rs.<label for="" id="amount">200</label></div>
+                  </div>
+                </div><br>
                 <h6>Products: </h6>
                   <% allData.forEach(element => { %>
                   <div>&emsp;&emsp; <%= element.productDetail.product_name %> &emsp; &emsp; &emsp; Qty: <%= element.productQuantity %> <label for="">x &emsp; Rs. <%= element.productDetail.price %></label>&emsp; = &emsp;&emsp;Rs.  <%= element.productPrice %></div> 
                   <% }) %>
-                  <!-- <div>&emsp; white Shoes &emsp; Qty: 1 <label for="">x Rs.999</label>&emsp;Price: Rs.999</div> -->
+                </table>                  
                   <hr>
-                  &emsp; &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &emsp; <b>Total: &emsp;&emsp;  Rs. <%= sum %> </b>  
+                  <table class="w-100">
+                    <tr class="text-center">
+                      <th>Product total:</th>
+                      <th>Rs.<%= sum %></th>
+                    </tr>
+                    <tr class="text-center">
+                      <th>Discount:</th>
+                      <th>- Rs.<label for="" id="discount">0</label></th>]
+                    </tr>
+                    <tr class="text-center">
+                      <th>Total:</th>
+                      <th>Rs.<label for="" id="total"><%= sum %></label></th>
+                    </tr>
+                  </table>
                 </div>
               </div>
+
+
               <div class="shipadrss col-md-6 mt-3">
                 <h5 class="white">Shipping Address:</h5>
                 <!-- <a href="/address" class="btn btn-primary">+ Add Address</a> -->
@@ -48,6 +77,8 @@
                 </div>
                 <% } %>
               </div>
+
+
               <div class="payment col-md-6 mt-3">
                 <h5 class="white">Payment:</h5>
                 <div
@@ -61,7 +92,7 @@
                   style="border: 1px solid"
                   class="p-4 d-flex align-content-center align-items-center d9"
                 >
-                <input type="radio" name="pay" value="Online" class="me-1" required/>
+                <input type="radio" name="pay" value="online" class="me-1" required/>
                   Pay Online
                 </div>
               </div>
@@ -70,7 +101,6 @@
                 <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
                   Confirm Order
                 </button>
-                
                   <a
                     href="/cart"
                     class="btn btn-primary btn-lg w-100 mt-2"
@@ -93,15 +123,29 @@
     ></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="/javascript/cart.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <style>
       .blue{
-        background-color: #000000;
+        background-color: #02c022;
       }
       .d9{
         background-color: #ffffff;
       }
       .white{
         color: rgb(0, 0, 0);
+      }
+      .white:hover{
+        color: white;
+      }
+      .con{
+        background-color: #00b63d;
+        color: #003049;
+      }
+      .con:hover{
+        color: #000;
+      }
+      .he{
+        height: 33px !important;
       }
     </style>
 
@@ -127,6 +171,47 @@
       });
   });
     
+  function cou(amount) {
+        const code = document.getElementById('coupon').value;
+        $.ajax({
+          url: "/couponcheck",
+          method: "post",
+          data: {
+            code,
+            amount,
+          },
+          success: (response) => {
+                if (response[0].success) {
+                  swal("Coupon Added!", "You got a discount of Rs." + response[0].dis, "success")
+                    .then(() => {
+                      document.getElementById('discount').innerHTML = response[0].dis;
+                      const total = Number(amount) - Number(response[0].dis);
+                      document.getElementById('total').innerHTML = total;
+                      applied(response[1].check);
+                    });
+                } else {
+                  swal("Error", response[0].message , "error")
+                    .then(() => {
+                          location.reload()
+                  });
+                }
+            },
+          });
+      }
+      function applied(data) {
+        document.getElementById('coup_code').innerHTML = data.coupon_code;
+        document.getElementById('per').innerHTML = data.offer;
+        document.getElementById('amount').innerHTML = data.max_amount;
+        document.getElementById('applied').style.display = 'block';
+        document.getElementById('apply').style.display = 'none';
+      }
+      function remove(sum) {
+        document.getElementById('applied').style.display = 'none';
+        document.getElementById('apply').style.display = 'flex';
+        document.getElementById('discount').innerHTML = 0;
+        document.getElementById('total').innerHTML = sum;
+
+      }
     
   function razorPay(order) {
         var options = {

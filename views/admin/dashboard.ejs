@@ -147,11 +147,25 @@
            </div>
           </div>
 
+          
+        <div style="display: flex; margin-top: 5rem;">
 
-          <div class="row gap-2 justify-content-center p-2"></div>
+
+          <div class="row gap-2 justify-content-center p-2 pr-5"></div>
           <div class="col-md-7 mt-5 gbg"  style=" width: 50%; border-radius: 5px">
             <canvas id="Paystatus" class=""> </canvas>
           </div>
+
+
+          <div class="row gap-2 justify-content-center p-2 pr-5"></div>
+          <div class="col-md-7 mt-5 gbg"  style=" width: 45%; border-radius: 5px">
+            <canvas id="CategoryStatus" class=""> </canvas>
+          </div>
+
+        </div>
+
+
+
         </div>
 
           <input type="hidden" id="pending" value="<%= pending %>" />
@@ -171,6 +185,7 @@
         <script>
           const ctx = document.getElementById("ordersStatusChart");
           const ctx1 = document.getElementById("Paystatus");
+          const ctx2 = document.getElementById("CategoryStatus");
           const pending = Number(document.getElementById("pending").value);
           const completed = Number(document.getElementById("completed").value);
           const delivered = Number(document.getElementById("delivered").value);
@@ -205,7 +220,7 @@
           new Chart(ctx1, {
             type: "pie",
             data: {
-              labels: ["COD", "Online"],
+              labels: ["Cod", "Online"],
               datasets: [
                 {
                   label: "No .of Orders",
@@ -217,6 +232,21 @@
             },
             options: {},
           });
+
+
+          new Chart(ctx2, {
+          type: 'doughnut',
+          data: {
+          labels: ['Week 1', 'Week 2', 'Week 3'],
+          datasets: [{
+          data: [30, 20, 50],
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+          hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+          }]
+        }
+     }); 
+
+
         </script>
     
 
