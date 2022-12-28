@@ -9,7 +9,7 @@ const userAuth = require("../middleware/userAuth");
 const path  = require("path");
 
 
-const usercontroller = require("../controllers/usercontroller");
+const usercontroller = require("../controllers/userController");
 
 
 // Register And Login Section
