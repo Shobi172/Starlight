@@ -21,7 +21,7 @@ admin_route.get('/',admincontroller.GetLogin);
  
 admin_route.post('/login',admincontroller.PostLogin);
 
-admin_route.get('/dashboard', adminAuth,admincontroller.GetDashboard);
+admin_route.get('/dashboard', adminAuth ,admincontroller.GetDashboard);
 
 
 // Order Secion

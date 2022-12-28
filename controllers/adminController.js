@@ -40,17 +40,22 @@ const GetLogin = async (req, res) => {
 
 const PostLogin = async (req, res) => {
   try {
+console.log('i got post')
 
     const Email="admin@gmail.com";
-    const Password=000
+    const Password= '000'
 
+    console.log(req.body.email + "and"+req.body.password)
     const email = req.body.email;
     const password = req.body.password;
-      if(email===Email && password===Password){
-        res.render("admin/dashboard");
-      }else{
-        res.render("admin/login", { message: "Invalid login detials" });
 
+      if(email == Email && password == Password){
+       
+        req.session.admin_id = req.body.email;
+        res.redirect("/admin/dashboard");
+      }else{
+        console.log('OOPS FAILED')
+        res.render("admin/login", { message: "Invalid login detials" });
       }
 
     // console.log(email);
@@ -122,6 +127,7 @@ const GetDashboard = async (req, res) => {
             cod,
             online,
         });
+
    
   } catch (error) {
     console.log(error.message);
