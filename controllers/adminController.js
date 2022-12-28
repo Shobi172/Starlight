@@ -40,24 +40,39 @@ const GetLogin = async (req, res) => {
 
 const PostLogin = async (req, res) => {
   try {
+
+    const Email="admin@gmail.com";
+    const Password=000
+
     const email = req.body.email;
     const password = req.body.password;
+      if(email===Email && password===Password){
+        res.render("admin/dashboard");
+      }else{
+        res.render("admin/login", { message: "Invalid login detials" });
+
+      }
+
     // console.log(email);
     // console.log(password);
-    const adminData = await Admin.findOne({ email: email });
+    // const adminData = await Admin.findOne({ email: email });
     // console.log(adminData);
 
-    if (adminData) {
-      if (adminData.password == password) {
-        req.session.admin_id = adminData._id;
-        res.redirect("/admin/dashboard");
-        // console.log(req.session.admin);
-      } else {
-        res.redirect("/admin/login");
-      }
-    } else {
-      res.render("admin/login", { message: "Invalid login detials" });
-    }
+    // if (adminData) {
+    //   if (adminData.password == password) {
+    //     req.session.admin_id = adminData._id;
+    //     res.redirect("/admin/dashboard");
+    //     // console.log(req.session.admin);
+    //   } else {
+    //     res.redirect("/admin/login");
+    //   }
+    // } else {
+    //   res.render("admin/login", { message: "Invalid login detials" });
+    // }
+
+
+
+
   } catch (error) {
     console.log(error.message);
   }
