@@ -26,19 +26,19 @@
                 
                 <tbody>
 
-                  <% allData.forEach(data =>{  %>
+                  <% allData.forEach((data)=>{ %>
 
-                  <tr <% if(data.coupon_status === 'Deactivated'){ %> 
+                  <!-- <tr <% if(data.coupon_status === 'Deactivated'){ %>  -->
 
                     class="table-danger"
 
-                     <% } %> >
+                     <!-- <% } %> > -->
                       <td><%= data.coupon_code %></td>
                       <td><%= data.offer %></td>
                       <td><%= data.max_amount %></td>
                       <td><%= data.coupon_status %></td>
                       <td colspan="3">
-                        <div class="d-flex flex-column gap-1">
+                        <!-- <div class="d-flex flex-column gap-1">
 
                         <% if(data.coupon_status === 'Active') { %>
 
@@ -58,7 +58,7 @@
                               role="button"
                               aria-disabled="true"
                               >Activate</a>
-                              <% } %> 
+                              <% } %>  -->
                           <a
                               href="/admin/deletecoupon/<%= data._id %>"
                               class="btn btn-danger btn-sm"
@@ -77,7 +77,7 @@
                       </td>
                   </tr>
 
-                  <%})%>
+                  <% }) %> 
                   
                 </tbody> 
               </table>

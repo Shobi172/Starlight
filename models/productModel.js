@@ -1,51 +1,42 @@
 const mongoose = require("mongoose");
 const Category = require("./categoryModel");
 
-
 const imageSchema = new mongoose.Schema({
-    url:String,
-    filename:String
+  url: String,
+  filename: String,
 });
 
-const productSchema = new mongoose.Schema({
-
-
-
+const productSchema = new mongoose.Schema(
+  {
     name: {
-        type:String,
-        
+      type: String,
     },
     category: {
-        type: mongoose.SchemaTypes.ObjectId,
-        ref:'Category'
-        
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "Category",
     },
     quantity: {
-        type:Number
-        
+      type: Number,
     },
-    image: [{
-        url:String,
-        filename:String
-        
-    }],
-    
+    image: [
+      {
+        url: String,
+        filename: String,
+      },
+    ],
+
     stock: {
-        type:String
-        
+      type: String,
     },
     price: {
-        type:Number
-        
+      type: Number,
     },
     description: {
-        type:String
-        
-    }
-    
-   
+      type: String,
+    },
+  },
+  { timestamps: true }
+);
 
-},{timestamps: true});
-
-const Product = mongoose.model('Product',productSchema);
+const Product = mongoose.model("Product", productSchema);
 module.exports = Product;
